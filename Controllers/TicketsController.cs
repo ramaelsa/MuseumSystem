@@ -58,6 +58,16 @@ namespace MuseumSystem.Controllers
             if (ModelState.IsValid)
             {
                 _context.Add(ticket);
+
+                _context.AuditLogs.Add(new AuditLog
+                {
+                    UserId = userId,
+                    Action = "Create",
+                    EntityName = "Ticket",
+                    DateTime = DateTime.Now,
+                    Details = $"Ticket created for {ticket.VisitorName} on {ticket.VisitDate.ToShortDateString()}"
+                });
+
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -85,6 +95,16 @@ namespace MuseumSystem.Controllers
                 try
                 {
                     _context.Update(ticket);
+
+                    _context.AuditLogs.Add(new AuditLog
+                    {
+                        UserId = User.FindFirstValue(ClaimTypes.NameIdentifier),
+                        Action = "Edit",
+                        EntityName = "Ticket",
+                        DateTime = DateTime.Now,
+                        Details = $"Admin updated Ticket ID {id} (Visitor: {ticket.VisitorName})"
+                    });
+
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -112,7 +132,19 @@ namespace MuseumSystem.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var ticket = await _context.Tickets.FindAsync(id);
-            if (ticket != null) _context.Tickets.Remove(ticket);
+            if (ticket != null)
+            {
+                _context.AuditLogs.Add(new AuditLog
+                {
+                    UserId = User.FindFirstValue(ClaimTypes.NameIdentifier),
+                    Action = "Delete",
+                    EntityName = "Ticket",
+                    DateTime = DateTime.Now,
+                    Details = $"Admin deleted/voided Ticket ID {id} for {ticket.VisitorName}"
+                });
+
+                _context.Tickets.Remove(ticket);
+            }
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
@@ -127,6 +159,15 @@ namespace MuseumSystem.Controllers
 
             if (ticket != null)
             {
+                _context.AuditLogs.Add(new AuditLog
+                {
+                    UserId = userId,
+                    Action = "Cancel",
+                    EntityName = "Ticket",
+                    DateTime = DateTime.Now,
+                    Details = $"User cancelled their own Ticket ID {id}"
+                });
+
                 _context.Tickets.Remove(ticket);
                 await _context.SaveChangesAsync();
             }
