@@ -21,5 +21,32 @@ namespace MuseumSystem.Controllers
             var users = await _userManager.Users.ToListAsync();
             return View(users);
         }
+
+        // POST: Users/Delete/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            //Prevent the admin from deleting themselves
+            if (user.Email == "admin@gmail.com")
+            {
+                return BadRequest("The primary administrator account cannot be deleted.");
+            }
+
+            var result = await _userManager.DeleteAsync(user);
+            if (result.Succeeded)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            return BadRequest("Error occurred while deleting user.");
+        }
     }
 }
