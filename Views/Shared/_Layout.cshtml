@@ -51,8 +51,31 @@
             text-transform: uppercase;
         }
 
-        .navbar-brand { font-weight: 800; text-transform: uppercase; letter-spacing: 3px; color: var(--museum-black) !important; }
-        .nav-link { font-family: 'Arial', sans-serif; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #555 !important; margin: 0 10px; }
+        .navbar-brand { 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            letter-spacing: 3px; 
+            color: var(--museum-black) !important; 
+        }
+
+        .nav-link { 
+            font-family: 'Arial', sans-serif; 
+            font-size: 0.8rem; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            color: #555 !important; 
+            margin: 0 10px; 
+        }
+
+        .nav-link:hover {
+            color: var(--museum-gold) !important;
+        }
+
+        /* Styling for the Admin Users link to make it stand out */
+        .nav-link.admin-link {
+            color: #dc3545 !important; /* bootstrap danger color */
+        }
+
         .footer-divider { height: 1px; background: #333; margin: 1.5rem 0; }
         footer a { color: #ccc; text-decoration: none; }
     </style>
@@ -62,12 +85,36 @@
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white mb-3">
         <div class="container">
             <a class="navbar-brand" asp-controller="Home" asp-action="Index">MUSEUM<span style="font-weight:300;">CORE</span></a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
             <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                 <ul class="navbar-nav flex-grow-1">
-                    <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Archive</a></li>
-                    <li class="nav-item"><a class="nav-link" asp-controller="Artists" asp-action="Index">Artists</a></li>
-                    <li class="nav-item"><a class="nav-link" asp-controller="Exhibits" asp-action="Index">Exhibits</a></li>
-                    <li class="nav-item"><a class="nav-link" asp-controller="Tickets" asp-action="Index">Tickets</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Archive</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="" asp-controller="Artists" asp-action="Index">Artists</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="" asp-controller="Exhibits" asp-action="Index">Exhibits</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="" asp-controller="Tickets" asp-action="Index">Tickets</a>
+                    </li>
+
+                    @* ONLY ADMINS SEE THIS LINK *@
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link admin-link" asp-area="" asp-controller="Users" asp-action="Index">
+                                <i class="bi bi-people-fill me-1"></i> Users
+                            </a>
+                        </li>
+                    }
                 </ul>
                 <partial name="_LoginPartial" />
             </div>
@@ -99,6 +146,7 @@
 
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
 @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

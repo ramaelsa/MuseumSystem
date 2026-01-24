@@ -1,0 +1,60 @@
+@model IEnumerable<Microsoft.AspNetCore.Identity.IdentityUser>
+
+@{
+    ViewData["Title"] = "User Management";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold text-uppercase" style="letter-spacing: 2px;">Registered Clients</h1>
+            <p class="text-muted small">Total Members: @Model.Count()</p>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-0">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th class="ps-4">User ID</th>
+                    <th>Email / Username</th>
+                    <th>Status</th>
+                    <th class="text-end pe-4">System Access</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    <tr>
+                        <td class="ps-4 small text-muted">@user.Id.Substring(0, 8)...</td>
+                        <td>
+                            <div class="fw-bold">@user.Email</div>
+                        </td>
+                        <td>
+                            @if (user.EmailConfirmed)
+                            {
+                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3">Verified</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-3">Pending</span>
+                            }
+                        </td>
+                        <td class="text-end pe-4">
+                            @if (user.Email == "admin@gmail.com")
+                            {
+                                <span class="text-danger fw-bold small text-uppercase">
+                                    <i class="bi bi-shield-lock-fill"></i> Full Admin
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="text-muted small text-uppercase">Standard User</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
