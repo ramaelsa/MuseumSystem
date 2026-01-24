@@ -1,9 +1,12 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MuseumSystem.Models;
 
 namespace MuseumSystem.Controllers.Api
 {
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
     [ApiController]
     public class ExhibitsApiController : ControllerBase
@@ -15,11 +18,9 @@ namespace MuseumSystem.Controllers.Api
             _context = context;
         }
 
-        // GET: api/exhibitsapi
         [HttpGet]
         public async Task<IActionResult> GetExhibits()
         {
-
             var exhibits = await _context.Exhibits
                 .Include(e => e.Artist)
                 .Select(e => new 
@@ -35,7 +36,6 @@ namespace MuseumSystem.Controllers.Api
             return Ok(exhibits);
         }
 
-        // GET
         [HttpGet("{id}")]
         public async Task<IActionResult> GetExhibit(int id)
         {
