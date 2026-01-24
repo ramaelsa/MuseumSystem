@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MuseumSystem.Models;
+using System.Security.Claims;
 
 namespace MuseumSystem.Controllers
 {
@@ -14,46 +15,52 @@ namespace MuseumSystem.Controllers
             _context = context;
         }
 
-        // GET: Tickets
         [AllowAnonymous] 
         public async Task<IActionResult> Index()
         {
-            // If Admin, show the full database of sales
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
             if (User.IsInRole("Admin"))
             {
                 return View(await _context.Tickets.ToListAsync());
             }
 
-            // If Visitor/User, just show the info page
+            if (User.Identity.IsAuthenticated)
+            {
+                var myTickets = await _context.Tickets
+                    .Where(t => t.UserId == userId)
+                    .ToListAsync();
+                return View(myTickets);
+            }
+
             return View(new List<Ticket>());
         }
 
-        // GET: Tickets/Create
-        [Authorize] // Only logged-in users can reach the booking form
-        public IActionResult Create()
-        {
-            return View();
-        }
+        [Authorize]
+        public IActionResult Create() => View();
 
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,VisitorName,VisitDate,Price")] Ticket ticket)
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            ticket.UserId = userId;
+
+            bool alreadyHasTicket = await _context.Tickets
+                .AnyAsync(t => t.UserId == userId && t.VisitDate.Date == ticket.VisitDate.Date);
+
+            if (alreadyHasTicket)
+            {
+                ModelState.AddModelError("VisitDate", "You already have a reservation for this date. Only one ticket per day is allowed.");
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(ticket);
                 await _context.SaveChangesAsync();
-                return RedirectToAction("Details", new { id = ticket.Id });
+                return RedirectToAction(nameof(Index));
             }
-            return View(ticket);
-        }
-
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null) return NotFound();
-            var ticket = await _context.Tickets.FirstOrDefaultAsync(m => m.Id == id);
-            if (ticket == null) return NotFound();
             return View(ticket);
         }
 
@@ -69,13 +76,22 @@ namespace MuseumSystem.Controllers
         [HttpPost]
         [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,VisitorName,VisitDate,Price")] Ticket ticket)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,UserId,VisitorName,VisitDate,Price")] Ticket ticket)
         {
             if (id != ticket.Id) return NotFound();
+
             if (ModelState.IsValid)
             {
-                _context.Update(ticket);
-                await _context.SaveChangesAsync();
+                try
+                {
+                    _context.Update(ticket);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!_context.Tickets.Any(e => e.Id == ticket.Id)) return NotFound();
+                    else throw;
+                }
                 return RedirectToAction(nameof(Index));
             }
             return View(ticket);
@@ -98,6 +114,23 @@ namespace MuseumSystem.Controllers
             var ticket = await _context.Tickets.FindAsync(id);
             if (ticket != null) _context.Tickets.Remove(ticket);
             await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Cancel(int id)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var ticket = await _context.Tickets.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
+
+            if (ticket != null)
+            {
+                _context.Tickets.Remove(ticket);
+                await _context.SaveChangesAsync();
+            }
+
             return RedirectToAction(nameof(Index));
         }
     }

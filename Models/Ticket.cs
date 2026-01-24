@@ -6,6 +6,8 @@ namespace MuseumSystem.Models
     public class Ticket
     {
         public int Id { get; set; }
+        
+        public string? UserId { get; set; } 
 
         [Required(ErrorMessage = "Visitor name is required")]
         [Display(Name = "Visitor Name")]
