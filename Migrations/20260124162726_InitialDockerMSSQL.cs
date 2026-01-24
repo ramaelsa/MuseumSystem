@@ -5,24 +5,18 @@
 namespace MuseumSystem.Migrations
 {
     /// <inheritdoc />
-    public partial class AddUserIdToTicket : Migration
+    public partial class InitialDockerMSSQL : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "UserId",
-                table: "Tickets",
-                type: "TEXT",
-                nullable: true);
+
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "UserId",
-                table: "Tickets");
+
         }
     }
 }

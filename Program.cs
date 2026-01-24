@@ -5,17 +5,16 @@ using MuseumSystem;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --- DATABASE CONNECTION ---
+// --- DATABASE CONNECTION (CONFIGURED FOR DOCKER MSSQL) ---
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
                         ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(connectionString));
+    options.UseSqlServer(connectionString));
 
 // --- IDENTITY & ROLES ---
 builder.Services.AddDefaultIdentity<IdentityUser>(options => {
     options.SignIn.RequireConfirmedAccount = false;
-    // so password admin123 will be accepted
     options.Password.RequireDigit = false;
     options.Password.RequiredLength = 3;
     options.Password.RequireNonAlphanumeric = false;

@@ -1,0 +1,44 @@
+@model IEnumerable<MuseumSystem.Models.AuditLog>
+
+@{
+    ViewData["Title"] = "System Audit Logs";
+}
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="fw-bold"><i class="bi bi-shield-lock me-2"></i>System Audit Logs</h1>
+        <span class="badge bg-dark">Admin Only</span>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                <tr>
+                    <th>Timestamp</th>
+                    <th>User ID</th>
+                    <th>Action</th>
+                    <th>Entity</th>
+                    <th>Details</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="text-nowrap small">@item.DateTime.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                        <td class="text-muted small">@item.UserId</td>
+                        <td>
+                            <span class="badge @(item.Action == "Delete" || item.Action == "Cancel" ? "bg-danger" : "bg-primary")">
+                                @item.Action
+                            </span>
+                        </td>
+                        <td class="fw-bold">@item.EntityName</td>
+                        <td>@item.Details</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
