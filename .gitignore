@@ -1,5 +1,15 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Build
 bin/
 obj/
-/packages/
-riderModule.iml
-/_ReSharper.Caches/
+
+# Database
+*.db
+
+# OS
+.DS_Store
+Thumbs.db

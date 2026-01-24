@@ -73,3 +73,13 @@ app.MapControllerRoute(
 app.MapRazorPages(); 
 
 app.Run();
+
+
+
+
+
+
+
+
+builder.Services.AddDbContext<MuseumDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));

@@ -1,0 +1,68 @@
+:root {
+    --black: #121212;
+    --gold: #b2945e;
+    --gray: #f4f4f4;
+}
+
+body.museum-body {
+    font-family: 'Georgia', serif;
+    background-color: var(--gray);
+    color: #333;
+}
+
+/* NAVBAR */
+.museum-navbar {
+    background-color: #fff;
+    border-bottom: 3px solid var(--black);
+    padding: 1rem 0;
+}
+
+.museum-logo {
+    font-weight: 800;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--black);
+}
+
+    .museum-logo span {
+        font-weight: 300;
+    }
+
+.nav-link {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #555;
+    margin: 0 12px;
+}
+
+    .nav-link:hover {
+        color: var(--gold);
+    }
+
+.admin-link {
+    color: #9b2c2c;
+}
+
+/* CONTENT */
+main {
+    background-color: white;
+    padding: 3rem;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+/* FOOTER */
+.museum-footer {
+    background-color: var(--black);
+    color: #aaa;
+    padding: 2.5rem 0;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* UX POLISH */
+a, button {
+    transition: all 0.25s ease;
+}
