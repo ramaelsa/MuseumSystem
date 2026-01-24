@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MuseumSystem.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MuseumSystem.Controllers
 {
@@ -17,13 +18,13 @@ namespace MuseumSystem.Controllers
             _context = context;
         }
 
-        // GET: Artists
+        // GET: Artists that Everyone can see
         public async Task<IActionResult> Index()
         {
             return View(await _context.Artists.ToListAsync());
         }
 
-        // GET: Artists/Details/5
+        // GET artists
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
@@ -36,7 +37,10 @@ namespace MuseumSystem.Controllers
             return View(artist);
         }
 
+        // --- ADMIN ONLY ACTIONS ---
+
         // GET: Artists/Create
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
             return View();
@@ -45,9 +49,9 @@ namespace MuseumSystem.Controllers
         // POST: Artists/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([Bind("Id,FullName,Bio")] Artist artist)
         {
-            // Crucial: Tell .NET to stop worrying about the empty list of Exhibits
             ModelState.Remove("Exhibits");
 
             if (ModelState.IsValid)
@@ -59,7 +63,8 @@ namespace MuseumSystem.Controllers
             return View(artist);
         }
 
-        // GET: Artists/Edit/5
+        // GET: Artists
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -70,9 +75,10 @@ namespace MuseumSystem.Controllers
             return View(artist);
         }
 
-        // POST: Artists/Edit/5
+        // POST: Artists
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id, [Bind("Id,FullName,Bio")] Artist artist)
         {
             if (id != artist.Id) return NotFound();
@@ -96,7 +102,8 @@ namespace MuseumSystem.Controllers
             return View(artist);
         }
 
-        // GET: Artists/Delete/5
+        // GET: Artists
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
@@ -109,9 +116,10 @@ namespace MuseumSystem.Controllers
             return View(artist);
         }
 
-        // POST: Artists/Delete/5
+        // POST: Artists
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var artist = await _context.Artists.FindAsync(id);
