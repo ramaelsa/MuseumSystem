@@ -1,48 +1,83 @@
 @model IEnumerable<MuseumSystem.Models.Ticket>
 
 @{
-    ViewData["Title"] = "Index";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Visitor Information";
 }
 
-<h1>Index</h1>
+<div class="container mt-5">
+    <div class="row g-5">
+        <div class="col-lg-7">
+            <h1 class="display-4 fw-bold mb-4">Plan Your Visit</h1>
+            <p class="text-muted mb-5">Welcome to the Museum Core Repository. Please find our visiting hours and location below.</p>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.VisitorName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.VisitDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Price)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.VisitorName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.VisitDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Price)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <h5 class="fw-bold text-uppercase small" style="letter-spacing: 1px;">Location</h5>
+                    <p class="text-secondary">100 Museum Plaza<br>Art District, NY 10001</p>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="fw-bold text-uppercase small" style="letter-spacing: 1px;">Hours</h5>
+                    <p class="text-secondary">Tue — Sun: 10am – 6pm<br>Monday: Closed</p>
+                </div>
+            </div>
+            
+            <hr class="my-5">
+            
+            <div class="bg-light p-4 border-start border-4 border-dark">
+                <h6 class="fw-bold">Note for Visitors</h6>
+                <p class="small mb-0">General admission data is available to all. However, to maintain archival integrity, <strong>online ticket booking is reserved for registered members only.</strong></p>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0 rounded-0 p-5 text-center bg-white border">
+                <i class="bi bi-ticket-detailed display-1 mb-4 text-dark"></i>
+                <h2 class="fw-bold mb-3">Tickets</h2>
+                
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <p class="mb-4">Welcome back, @User.Identity.Name. Book your next visit below.</p>
+                    <a asp-action="Create" class="btn btn-dark rounded-0 w-100 py-3 text-uppercase fw-bold">Book a Ticket</a>
+                }
+                else
+                {
+                    <p class="mb-4 text-muted small">Access exclusive exhibition booking by joining our community.</p>
+                    <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-outline-dark rounded-0 w-100 py-3 text-uppercase fw-bold mb-3">Login to Book</a>
+                    <a asp-area="Identity" asp-page="/Account/Register" class="text-dark small fw-bold">Create an Account</a>
+                }
+            </div>
+        </div>
+    </div>
+
+    @if (User.IsInRole("Admin"))
+    {
+        <div class="mt-5 pt-5 border-top">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="fw-bold text-danger">ADMIN: SALES LOG</h3>
+            </div>
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Visitor Name</th>
+                        <th>Visit Date</th>
+                        <th>Price</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var item in Model) {
+                    <tr>
+                        <td class="fw-bold">@item.VisitorName</td>
+                        <td>@item.VisitDate.ToShortDateString()</td>
+                        <td>$@item.Price</td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-link text-secondary">Edit</a>
+                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-link text-danger">Void</a>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

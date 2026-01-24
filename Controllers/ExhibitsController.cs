@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MuseumSystem.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MuseumSystem.Controllers
 {
@@ -19,13 +20,22 @@ namespace MuseumSystem.Controllers
         }
 
         // GET: Exhibits
+        [AllowAnonymous] // what visitors can access
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Exhibits.Include(e => e.Artist);
-            return View(await applicationDbContext.ToListAsync());
+            var query = _context.Exhibits.Include(e => e.Artist).AsQueryable();
+
+            // Public users can only view active entities
+            if (!User.Identity.IsAuthenticated)
+            {
+                query = query.Where(e => e.IsActive == true);
+            }
+
+            return View(await query.ToListAsync());
         }
 
-        // GET: Exhibits/Details/5
+        // GET
+        [AllowAnonymous]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
@@ -39,19 +49,20 @@ namespace MuseumSystem.Controllers
             return View(exhibit);
         }
 
-        // GET: Exhibits/Create
+        // GET
+        [Authorize] // Requires Login
         public IActionResult Create()
         {
             ViewData["ArtistId"] = new SelectList(_context.Artists, "Id", "FullName");
             return View();
         }
 
-        // POST: Exhibits/Create
+        // POST
         [HttpPost]
+        [Authorize]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Name,Description,IsActive,ArtistId")] Exhibit exhibit)
         {
-            // Fix: Remove Artist from validation so it doesn't fail
             ModelState.Remove("Artist");
 
             if (ModelState.IsValid)
@@ -64,7 +75,8 @@ namespace MuseumSystem.Controllers
             return View(exhibit);
         }
 
-        // GET: Exhibits/Edit/5
+        // GET
+        [Authorize]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -76,14 +88,14 @@ namespace MuseumSystem.Controllers
             return View(exhibit);
         }
 
-        // POST: Exhibits/Edit/5
+        // POST
         [HttpPost]
+        [Authorize]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,IsActive,ArtistId")] Exhibit exhibit)
         {
             if (id != exhibit.Id) return NotFound();
 
-            // Fix: Remove Artist from validation
             ModelState.Remove("Artist");
 
             if (ModelState.IsValid)
@@ -104,7 +116,8 @@ namespace MuseumSystem.Controllers
             return View(exhibit);
         }
 
-        // GET: Exhibits/Delete/5
+        // GET
+        [Authorize]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
@@ -118,8 +131,9 @@ namespace MuseumSystem.Controllers
             return View(exhibit);
         }
 
-        // POST: Exhibits/Delete/5
+        // POST
         [HttpPost, ActionName("Delete")]
+        [Authorize]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
