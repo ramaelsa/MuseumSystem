@@ -6,10 +6,11 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --- DATABASE CONNECTION (CONFIGURED FOR DOCKER MSSQL) ---
+// --- DATABASE CONNECTION ---
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
                         ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
@@ -28,7 +29,7 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => {
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
-// --- JWT CONFIGURATION (#25 Bonus) ---
+// --- JWT CONFIGURATION ---
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]!);
 
@@ -48,6 +49,37 @@ builder.Services.AddAuthentication()
         };
     });
 
+// --- SWAGGER WITH AUTHORIZE BUTTON ---
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Museum API", Version = "v1" });
+    
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer {token}\"",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+});
+
 // --- API & JSON CONFIGURATION ---
 builder.Services.AddControllersWithViews()
     .AddJsonOptions(options => 
@@ -56,7 +88,6 @@ builder.Services.AddControllersWithViews()
         options.JsonSerializerOptions.WriteIndented = true; 
     });
 
-// --- SESSION DATA ---
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
@@ -66,7 +97,7 @@ builder.Services.AddSession(options =>
 
 var app = builder.Build();
 
-// --- THE TRIGGER: THIS RUNS THE SEEDER ---
+// --- SEEDER ---
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -80,6 +111,16 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+// --- SWAGGER UI ---
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Museum API V1");
+    });
+}
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -88,7 +129,6 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
 
 app.UseAuthentication();

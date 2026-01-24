@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace MuseumSystem.Controllers
 {
+    [Route("api/[controller]")] // Tells Swagger how to find the API
     public class ExhibitsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -19,131 +20,93 @@ namespace MuseumSystem.Controllers
             _context = context;
         }
 
-        // GET: Exhibits
-        [AllowAnonymous] // what visitors can access
-        public async Task<IActionResult> Index()
+        // GET: api/Exhibits
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetExhibits()
         {
             var query = _context.Exhibits.Include(e => e.Artist).AsQueryable();
 
-            // Public users can only view active entities
             if (!User.Identity.IsAuthenticated)
             {
                 query = query.Where(e => e.IsActive == true);
             }
 
-            return View(await query.ToListAsync());
+            var results = await query.ToListAsync();
+            
+            // If the request comes from a browser (MVC), return View. If from API, return Data.
+            if (Request.Headers["Accept"].ToString().Contains("text/html"))
+                return View("Index", results);
+                
+            return Ok(results);
         }
 
         // GET
+        [HttpGet("{id}")]
         [AllowAnonymous]
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> GetExhibit(int id)
         {
-            if (id == null) return NotFound();
-
             var exhibit = await _context.Exhibits
                 .Include(e => e.Artist)
                 .FirstOrDefaultAsync(m => m.Id == id);
             
             if (exhibit == null) return NotFound();
 
-            return View(exhibit);
+            if (Request.Headers["Accept"].ToString().Contains("text/html"))
+                return View("Details", exhibit);
+
+            return Ok(exhibit);
         }
 
-        // GET
-        [Authorize] // Requires Login
-        public IActionResult Create()
-        {
-            ViewData["ArtistId"] = new SelectList(_context.Artists, "Id", "FullName");
-            return View();
-        }
-
-        // POST
+        // POST: api/Exhibits
         [HttpPost]
         [Authorize]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Description,IsActive,ArtistId")] Exhibit exhibit)
+        public async Task<IActionResult> CreateExhibit([FromBody] Exhibit exhibit)
         {
             ModelState.Remove("Artist");
-
             if (ModelState.IsValid)
             {
                 _context.Add(exhibit);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return CreatedAtAction(nameof(GetExhibit), new { id = exhibit.Id }, exhibit);
             }
-            ViewData["ArtistId"] = new SelectList(_context.Artists, "Id", "FullName", exhibit.ArtistId);
-            return View(exhibit);
+            return BadRequest(ModelState);
         }
 
-        // GET
+        // PUT
+        [HttpPut("{id}")]
         [Authorize]
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> UpdateExhibit(int id, [FromBody] Exhibit exhibit)
         {
-            if (id == null) return NotFound();
+            if (id != exhibit.Id) return BadRequest();
 
-            var exhibit = await _context.Exhibits.FindAsync(id);
-            if (exhibit == null) return NotFound();
-            
-            ViewData["ArtistId"] = new SelectList(_context.Artists, "Id", "FullName", exhibit.ArtistId);
-            return View(exhibit);
-        }
+            _context.Entry(exhibit).State = EntityState.Modified;
 
-        // POST
-        [HttpPost]
-        [Authorize]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,IsActive,ArtistId")] Exhibit exhibit)
-        {
-            if (id != exhibit.Id) return NotFound();
-
-            ModelState.Remove("Artist");
-
-            if (ModelState.IsValid)
+            try
             {
-                try
-                {
-                    _context.Update(exhibit);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ExhibitExists(exhibit.Id)) return NotFound();
-                    else throw;
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["ArtistId"] = new SelectList(_context.Artists, "Id", "FullName", exhibit.ArtistId);
-            return View(exhibit);
-        }
-
-        // GET
-        [Authorize]
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null) return NotFound();
-
-            var exhibit = await _context.Exhibits
-                .Include(e => e.Artist)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            
-            if (exhibit == null) return NotFound();
-
-            return View(exhibit);
-        }
-
-        // POST
-        [HttpPost, ActionName("Delete")]
-        [Authorize]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var exhibit = await _context.Exhibits.FindAsync(id);
-            if (exhibit != null)
-            {
-                _context.Exhibits.Remove(exhibit);
                 await _context.SaveChangesAsync();
             }
-            return RedirectToAction(nameof(Index));
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ExhibitExists(id)) return NotFound();
+                else throw;
+            }
+
+            return NoContent();
+        }
+
+        // DELETE
+        [HttpDelete("{id}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteExhibit(int id)
+        {
+            var exhibit = await _context.Exhibits.FindAsync(id);
+            if (exhibit == null) return NotFound();
+
+            _context.Exhibits.Remove(exhibit);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
 
         private bool ExhibitExists(int id)

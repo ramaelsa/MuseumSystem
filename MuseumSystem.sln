@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MuseumSystem", "MuseumSystem.csproj", "{DD31032C-3B63-403A-BB6E-8AC33F6EE038}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MuseumSystem.Tests", "..\MuseumSystem.Tests\MuseumSystem.Tests.csproj", "{A946B71A-9CC1-4C26-A617-C788C67441B1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{DD31032C-3B63-403A-BB6E-8AC33F6EE038}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DD31032C-3B63-403A-BB6E-8AC33F6EE038}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DD31032C-3B63-403A-BB6E-8AC33F6EE038}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A946B71A-9CC1-4C26-A617-C788C67441B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A946B71A-9CC1-4C26-A617-C788C67441B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A946B71A-9CC1-4C26-A617-C788C67441B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A946B71A-9CC1-4C26-A617-C788C67441B1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
