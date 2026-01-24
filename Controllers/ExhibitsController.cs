@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace MuseumSystem.Controllers
 {
-    [Route("api/[controller]")] // Tells Swagger how to find the API
+    [Route("api/[controller]")]
     public class ExhibitsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -23,25 +23,69 @@ namespace MuseumSystem.Controllers
         // GET: api/Exhibits
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> GetExhibits()
+        public async Task<IActionResult> GetExhibits(string searchString, string sortOrder, bool? isActive, int pageNumber = 1)
         {
             var query = _context.Exhibits.Include(e => e.Artist).AsQueryable();
 
+            // Logic for Public Users 
             if (!User.Identity.IsAuthenticated)
             {
                 query = query.Where(e => e.IsActive == true);
             }
 
-            var results = await query.ToListAsync();
-            
-            // If the request comes from a browser (MVC), return View. If from API, return Data.
+            //  Filtering
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                query = query.Where(e => e.Name.Contains(searchString) || e.Description.Contains(searchString));
+            }
+
+            if (isActive.HasValue)
+            {
+                query = query.Where(e => e.IsActive == isActive.Value);
+            }
+
+            // Ordering
+            ViewData["CurrentSort"] = sortOrder;
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    query = query.OrderByDescending(e => e.Name);
+                    break;
+                case "id_asc":
+                    query = query.OrderBy(e => e.Id);
+                    break;
+                default:
+                    query = query.OrderBy(e => e.Name);
+                    break;
+            }
+
+            //  Pagination 
+            int pageSize = 5;
+            var totalItems = await query.CountAsync();
+            var results = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            // Store metadata for MVC Views
+            ViewData["TotalPages"] = (int)Math.Ceiling(totalItems / (double)pageSize);
+            ViewData["CurrentPage"] = pageNumber;
+            ViewData["SearchString"] = searchString;
+
             if (Request.Headers["Accept"].ToString().Contains("text/html"))
                 return View("Index", results);
-                
-            return Ok(results);
+
+            return Ok(new
+            {
+                totalItems,
+                pageNumber,
+                pageSize,
+                totalPages = ViewData["TotalPages"],
+                data = results
+            });
         }
 
-        // GET
+        // GET: api/Exhibits
         [HttpGet("{id}")]
         [AllowAnonymous]
         public async Task<IActionResult> GetExhibit(int id)
@@ -49,7 +93,7 @@ namespace MuseumSystem.Controllers
             var exhibit = await _context.Exhibits
                 .Include(e => e.Artist)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            
+
             if (exhibit == null) return NotFound();
 
             if (Request.Headers["Accept"].ToString().Contains("text/html"))
@@ -60,7 +104,7 @@ namespace MuseumSystem.Controllers
 
         // POST: api/Exhibits
         [HttpPost]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateExhibit([FromBody] Exhibit exhibit)
         {
             ModelState.Remove("Artist");
@@ -73,9 +117,9 @@ namespace MuseumSystem.Controllers
             return BadRequest(ModelState);
         }
 
-        // PUT
+        // PUT: api/Exhibits
         [HttpPut("{id}")]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateExhibit(int id, [FromBody] Exhibit exhibit)
         {
             if (id != exhibit.Id) return BadRequest();
@@ -95,9 +139,9 @@ namespace MuseumSystem.Controllers
             return NoContent();
         }
 
-        // DELETE
+        // DELETE: api/Exhibits
         [HttpDelete("{id}")]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteExhibit(int id)
         {
             var exhibit = await _context.Exhibits.FindAsync(id);
@@ -112,6 +156,15 @@ namespace MuseumSystem.Controllers
         private bool ExhibitExists(int id)
         {
             return _context.Exhibits.Any(e => e.Id == id);
+        }
+        
+        [HttpGet("Create")]
+        [Authorize(Roles = "Admin")]
+        [ApiExplorerSettings(IgnoreApi = true)]
+        public IActionResult Create()
+        {
+            ViewData["ArtistId"] = new SelectList(_context.Artists, "Id", "FullName");
+            return View();
         }
     }
 }
