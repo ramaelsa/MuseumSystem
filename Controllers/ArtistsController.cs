@@ -18,7 +18,7 @@ namespace MuseumSystem.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index(string searchString)
+        public async Task<IActionResult> Index(string searchString, int pageNumber = 1)
         {
             var query = _context.Artists.AsQueryable();
 
@@ -29,7 +29,14 @@ namespace MuseumSystem.Controllers
 
             ViewData["SearchString"] = searchString;
 
-            return View(await query.ToListAsync());
+            int pageSize = 6;
+            var totalItems = await query.CountAsync();
+            var results = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+
+            ViewData["TotalPages"] = (int)Math.Ceiling(totalItems / (double)pageSize);
+            ViewData["CurrentPage"] = pageNumber;
+
+            return View(results);
         }
 
         [Authorize(Roles = "Admin")]

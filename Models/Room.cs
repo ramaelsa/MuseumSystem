@@ -1,8 +1,9 @@
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace MuseumSystem.Models
 {
-    public class Exhibit
+    public class Room
     {
         public int Id { get; set; }
 
@@ -11,15 +12,10 @@ namespace MuseumSystem.Models
 
         public string Description { get; set; } = string.Empty;
 
-        public bool IsActive { get; set; } = true;
+        public int Floor { get; set; }
 
         public string? ImageUrl { get; set; }
-        
-        [Required]
-        public int ArtistId { get; set; }
-        public Artist? Artist { get; set; }
 
-        public int? RoomId { get; set; }
-        public Room? Room { get; set; }
+        public virtual ICollection<Exhibit>? Exhibits { get; set; }
     }
 }

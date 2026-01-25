@@ -12,6 +12,7 @@ namespace MuseumSystem.Models
 
         public DbSet<Exhibit> Exhibits { get; set; }
         public DbSet<Artist> Artists { get; set; }
+        public DbSet<Room> Rooms { get; set; }
         public DbSet<Ticket> Tickets { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }
         public DbSet<SystemSetting> SystemSettings { get; set; }

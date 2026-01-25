@@ -43,10 +43,19 @@
                                     </div>
                                 </div>
 
-                                <div class="mb-3">
-                                    <label asp-for="ImageUrl" class="form-label fw-bold small text-uppercase">Update Image Link</label>
-                                    <input asp-for="ImageUrl" class="form-control rounded-0" />
-                                    <span asp-validation-for="ImageUrl" class="text-danger small"></span>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="RoomId" class="form-label fw-bold small text-uppercase">Assigned Gallery</label>
+                                        <select asp-for="RoomId" class="form-select rounded-0" asp-items="ViewBag.RoomId">
+                                            <option value="">-- No Gallery --</option>
+                                        </select>
+                                        <span asp-validation-for="RoomId" class="text-danger small"></span>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="ImageUrl" class="form-label fw-bold small text-uppercase">Image Link</label>
+                                        <input asp-for="ImageUrl" class="form-control rounded-0" />
+                                        <span asp-validation-for="ImageUrl" class="text-danger small"></span>
+                                    </div>
                                 </div>
 
                                 <div class="mb-3">

@@ -1,0 +1,62 @@
+@model IEnumerable<MuseumSystem.Models.Room>
+
+@{
+    ViewData["Title"] = "Museum Galleries";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h1 class="fw-bold text-uppercase mb-0" style="letter-spacing: 2px;">Museum Galleries</h1>
+            <p class="text-muted small">Floor Plan & Curated Spaces</p>
+        </div>
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-action="Create" class="btn btn-dark rounded-0 px-4 fw-bold">
+                <i class="bi bi-plus-lg me-2"></i>ESTABLISH NEW GALLERY
+            </a>
+        }
+    </div>
+
+    <div class="row g-4">
+        @foreach (var item in Model)
+        {
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm rounded-0 bg-light overflow-hidden">
+                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+                    {
+                        <div style="height: 200px; overflow: hidden;">
+                            <img src="@item.ImageUrl" class="card-img-top rounded-0 w-100 h-100" style="object-fit: cover;" alt="@item.Name">
+                        </div>
+                    }
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <span class="badge bg-dark rounded-0 mb-2 px-3">LEVEL @item.Floor</span>
+                                <h3 class="fw-bold text-uppercase">@item.Name</h3>
+                            </div>
+                            <div class="text-end">
+                                <span class="h4 fw-bold text-dark">@item.Exhibits?.Count</span>
+                                <p class="small text-muted text-uppercase mb-0" style="font-size: 0.65rem;">Collections</p>
+                            </div>
+                        </div>
+                        <p class="text-muted mt-3 small" style="line-height: 1.6;">@item.Description</p>
+                    </div>
+                    <div class="card-footer bg-white border-0 p-4 pt-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-dark btn-sm rounded-0 px-4 fw-bold">VIEW COLLECTION</a>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <div class="btn-group">
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-link text-secondary text-decoration-none">Edit</a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-link text-danger text-decoration-none">Delete</a>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

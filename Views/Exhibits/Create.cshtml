@@ -32,10 +32,19 @@
                             </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label asp-for="ImageUrl" class="form-label fw-bold small text-uppercase">Image Archive Link</label>
-                            <input asp-for="ImageUrl" class="form-control rounded-0" placeholder="https://..." />
-                            <span asp-validation-for="ImageUrl" class="text-danger small"></span>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="RoomId" class="form-label fw-bold small text-uppercase">Museum Gallery</label>
+                                <select asp-for="RoomId" class="form-select rounded-0" asp-items="ViewBag.RoomId">
+                                    <option value="">-- Select Gallery --</option>
+                                </select>
+                                <span asp-validation-for="RoomId" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="ImageUrl" class="form-label fw-bold small text-uppercase">Image Link</label>
+                                <input asp-for="ImageUrl" class="form-control rounded-0" placeholder="https://..." />
+                                <span asp-validation-for="ImageUrl" class="text-danger small"></span>
+                            </div>
                         </div>
 
                         <div class="mb-4">

@@ -1,0 +1,32 @@
+@model MuseumSystem.Models.Room
+
+@{
+    ViewData["Title"] = "Decommission Gallery";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-danger border-2 rounded-0 shadow-sm">
+                <div class="card-body p-5 text-center">
+                    <i class="bi bi-exclamation-triangle text-danger display-1 mb-3"></i>
+                    <h2 class="fw-bold text-uppercase mb-3">Decommission Gallery?</h2>
+                    <p class="text-muted">Are you sure you want to permanently remove <strong>@Model.Name</strong>?</p>
+                    
+                    <div class="bg-light p-3 mb-4 text-start">
+                        <p class="small mb-1"><strong>NAME:</strong> @Model.Name</p>
+                        <p class="small mb-0"><strong>FLOOR:</strong> @Model.Floor</p>
+                    </div>
+
+                    <form asp-action="Delete">
+                        <input type="hidden" asp-for="Id" />
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger rounded-0 fw-bold py-2">CONFIRM DELETION</button>
+                            <a asp-action="Index" class="btn btn-outline-secondary rounded-0 py-2">CANCEL</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

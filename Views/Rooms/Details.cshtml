@@ -1,0 +1,80 @@
+@model MuseumSystem.Models.Room
+
+@{
+    ViewData["Title"] = Model.Name;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a asp-action="Index" class="text-dark text-decoration-none text-uppercase small fw-bold">Galleries</a></li>
+            <li class="breadcrumb-item active text-uppercase small" aria-current="page">@Model.Name</li>
+        </ol>
+    </nav>
+
+    <div class="card border-0 rounded-0 shadow-sm mb-5 overflow-hidden">
+        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+        {
+            <div style="height: 400px; overflow: hidden; position: relative;">
+                <img src="@Model.ImageUrl" class="w-100 h-100" style="object-fit: cover;" alt="@Model.Name">
+                <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); padding: 40px;">
+                    <span class="badge bg-white text-dark rounded-0 mb-2 px-3 text-uppercase">Floor @Model.Floor</span>
+                    <h1 class="display-4 fw-bold text-white text-uppercase">@Model.Name</h1>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="bg-dark p-5 text-white">
+                <span class="badge bg-secondary rounded-0 mb-2 px-3 text-uppercase">Floor @Model.Floor</span>
+                <h1 class="display-4 fw-bold text-uppercase">@Model.Name</h1>
+            </div>
+        }
+        <div class="card-body p-4 bg-light">
+            <p class="lead text-muted">@Model.Description</p>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
+        <h4 class="fw-bold text-uppercase mb-0" style="letter-spacing: 1px;">Artworks in this Gallery</h4>
+        <span class="text-muted">@(Model.Exhibits?.Count ?? 0) Pieces on Display</span>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @if (Model.Exhibits != null && Model.Exhibits.Any())
+        {
+            @foreach (var art in Model.Exhibits)
+            {
+                <div class="col">
+                    <div class="card h-100 border-0 shadow-sm rounded-0">
+                        @if (!string.IsNullOrEmpty(art.ImageUrl))
+                        {
+                            <img src="@art.ImageUrl" class="card-img-top rounded-0" style="height: 250px; object-fit: cover;" alt="@art.Name">
+                        }
+                        <div class="card-body">
+                            <h5 class="fw-bold mb-1">@art.Name</h5>
+                            <p class="small text-muted mb-3">By @(art.Artist?.FullName ?? "Unknown Artist")</p>
+                            <a href="/Exhibits/Details/@art.Id" class="btn btn-dark btn-sm rounded-0 w-100">VIEW ARTWORK</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12 text-center py-5">
+                <i class="bi bi-palette text-muted display-1 mb-3"></i>
+                <p class="text-muted fs-5">This gallery is currently being curated. No artworks are assigned here yet.</p>
+                @if (User.IsInRole("Admin"))
+                {
+                    <a href="/Exhibits/Create" class="btn btn-outline-dark rounded-0 mt-2">ASSIGN ARTWORK</a>
+                }
+            </div>
+        }
+    </div>
+
+    <div class="mt-5 pt-4 border-top">
+        <a asp-action="Index" class="btn btn-outline-secondary rounded-0 px-4">BACK TO GALLERIES</a>
+    </div>
+</div>

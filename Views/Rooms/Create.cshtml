@@ -1,0 +1,49 @@
+@model MuseumSystem.Models.Room
+
+@{
+    ViewData["Title"] = "Establish Gallery";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-0">
+                <div class="card-body p-5">
+                    <h2 class="fw-bold text-uppercase mb-4 text-center">Establish New Gallery</h2>
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label small fw-bold text-uppercase">Gallery Name</label>
+                            <input asp-for="Name" class="form-control rounded-0 border-dark shadow-none" placeholder="e.g., The Grand Renaissance Hall" />
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Floor" class="form-label small fw-bold text-uppercase">Floor Level</label>
+                            <input asp-for="Floor" type="number" class="form-control rounded-0 border-dark shadow-none" />
+                            <span asp-validation-for="Floor" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ImageUrl" class="form-label small fw-bold text-uppercase">Gallery Image URL</label>
+                            <input asp-for="ImageUrl" class="form-control rounded-0 border-dark shadow-none" placeholder="https://example.com/image.jpg" />
+                            <span asp-validation-for="ImageUrl" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Description" class="form-label small fw-bold text-uppercase">Curator's Notes</label>
+                            <textarea asp-for="Description" class="form-control rounded-0 border-dark shadow-none" rows="4"></textarea>
+                            <span asp-validation-for="Description" class="text-danger small"></span>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-dark rounded-0 fw-bold py-2">CREATE GALLERY</button>
+                            <a asp-action="Index" class="btn btn-outline-secondary rounded-0 py-2">CANCEL</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

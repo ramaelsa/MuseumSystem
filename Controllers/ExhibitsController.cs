@@ -21,9 +21,9 @@ namespace MuseumSystem.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> Index(string searchString, string sortOrder, bool? isActive)
+        public async Task<IActionResult> Index(string searchString, string sortOrder, bool? isActive, int pageNumber = 1)
         {
-            var query = _context.Exhibits.Include(e => e.Artist).AsQueryable();
+            var query = _context.Exhibits.Include(e => e.Artist).Include(e => e.Room).AsQueryable();
 
             if (!User.Identity.IsAuthenticated)
             {
@@ -52,7 +52,13 @@ namespace MuseumSystem.Controllers
                 default: query = query.OrderBy(e => e.Name); break;
             }
 
-            var results = await query.ToListAsync();
+            int pageSize = 6;
+            var totalItems = await query.CountAsync();
+            var results = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+
+            ViewData["TotalPages"] = (int)Math.Ceiling(totalItems / (double)pageSize);
+            ViewData["CurrentPage"] = pageNumber;
+
             return View(results);
         }
 
@@ -61,15 +67,18 @@ namespace MuseumSystem.Controllers
         public IActionResult Create()
         {
             ViewBag.ArtistId = new SelectList(_context.Artists, "Id", "FullName");
+            ViewBag.RoomId = new SelectList(_context.Rooms, "Id", "Name");
             return View();
         }
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Description,IsActive,ImageUrl,ArtistId")] Exhibit exhibit)
+        public async Task<IActionResult> Create([Bind("Id,Name,Description,IsActive,ImageUrl,ArtistId,RoomId")] Exhibit exhibit)
         {
             ModelState.Remove("Artist");
+            ModelState.Remove("Room");
+
             if (ModelState.IsValid)
             {
                 _context.Add(exhibit);
@@ -77,6 +86,7 @@ namespace MuseumSystem.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewBag.ArtistId = new SelectList(_context.Artists, "Id", "FullName", exhibit.ArtistId);
+            ViewBag.RoomId = new SelectList(_context.Rooms, "Id", "Name", exhibit.RoomId);
             return View(exhibit);
         }
 
@@ -84,7 +94,11 @@ namespace MuseumSystem.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Details(int id)
         {
-            var exhibit = await _context.Exhibits.Include(e => e.Artist).FirstOrDefaultAsync(m => m.Id == id);
+            var exhibit = await _context.Exhibits
+                .Include(e => e.Artist)
+                .Include(e => e.Room)
+                .FirstOrDefaultAsync(m => m.Id == id);
+            
             if (exhibit == null) return NotFound();
             return View(exhibit);
         }
@@ -95,17 +109,22 @@ namespace MuseumSystem.Controllers
         {
             var exhibit = await _context.Exhibits.FindAsync(id);
             if (exhibit == null) return NotFound();
+            
             ViewBag.ArtistId = new SelectList(_context.Artists, "Id", "FullName", exhibit.ArtistId);
+            ViewBag.RoomId = new SelectList(_context.Rooms, "Id", "Name", exhibit.RoomId);
             return View(exhibit);
         }
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,IsActive,ImageUrl,ArtistId")] Exhibit exhibit)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,IsActive,ImageUrl,ArtistId,RoomId")] Exhibit exhibit)
         {
             if (id != exhibit.Id) return BadRequest();
+            
             ModelState.Remove("Artist");
+            ModelState.Remove("Room");
+
             if (ModelState.IsValid)
             {
                 try
@@ -121,6 +140,7 @@ namespace MuseumSystem.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewBag.ArtistId = new SelectList(_context.Artists, "Id", "FullName", exhibit.ArtistId);
+            ViewBag.RoomId = new SelectList(_context.Rooms, "Id", "Name", exhibit.RoomId);
             return View(exhibit);
         }
 
