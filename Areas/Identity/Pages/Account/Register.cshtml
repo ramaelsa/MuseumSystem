@@ -1,64 +1,55 @@
 ﻿@page
 @model RegisterModel
 @{
-    ViewData["Title"] = "Register";
+    ViewData["Title"] = "Institutional Enrollment";
 }
 
-<h1>@ViewData["Title"]</h1>
-
-<div class="row">
-    <div class="col-md-4">
-        <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-            <h2>Create a new account.</h2>
-            <hr />
-            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                <label asp-for="Input.Email">Email</label>
-                <span asp-validation-for="Input.Email" class="text-danger"></span>
-            </div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label asp-for="Input.Password">Password</label>
-                <span asp-validation-for="Input.Password" class="text-danger"></span>
-            </div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label asp-for="Input.ConfirmPassword">Confirm Password</label>
-                <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
-            </div>
-            <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
-        </form>
+<div class="container mt-5">
+    <div class="border-bottom pb-3 mb-5 text-center">
+        <h1 class="fw-bold text-uppercase" style="letter-spacing: 4px;">@ViewData["Title"]</h1>
+        <p class="text-muted small text-uppercase">Create your Museum Core digital credentials</p>
     </div>
-    <div class="col-md-6 col-md-offset-2">
-        <section>
-            <h3>Use another service to register.</h3>
-            <hr />
-            @{
-                if ((Model.ExternalLogins?.Count ?? 0) == 0)
-                {
-                    <div>
-                        <p>
-                            There are no external authentication services configured. See this <a href="https://go.microsoft.com/fwlink/?LinkID=532715">article
-                            about setting up this ASP.NET application to support logging in via external services</a>.
-                        </p>
-                    </div>
-                }
-                else
-                {
-                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
-                        <div>
-                            <p>
-                                @foreach (var provider in Model.ExternalLogins!)
-                                {
-                                    <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
-                                }
-                            </p>
-                        </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                <h2 class="fw-bold text-uppercase mb-4" style="font-size: 1rem; letter-spacing: 1px;">Account Details</h2>
+                <div asp-validation-summary="ModelOnly" class="text-danger small mb-3" role="alert"></div>
+                
+                <div class="mb-3">
+                    <label asp-for="Input.Email" class="form-label small fw-bold text-uppercase">Email Address</label>
+                    <input asp-for="Input.Email" class="form-control rounded-0 border-dark shadow-none" autocomplete="username" aria-required="true" />
+                    <span asp-validation-for="Input.Email" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.Password" class="form-label small fw-bold text-uppercase">Password</label>
+                    <input asp-for="Input.Password" class="form-control rounded-0 border-dark shadow-none" autocomplete="new-password" aria-required="true" />
+                    <span asp-validation-for="Input.Password" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="Input.ConfirmPassword" class="form-label small fw-bold text-uppercase">Confirm Password</label>
+                    <input asp-for="Input.ConfirmPassword" class="form-control rounded-0 border-dark shadow-none" autocomplete="new-password" aria-required="true" />
+                    <span asp-validation-for="Input.ConfirmPassword" class="text-danger small"></span>
+                </div>
+
+                <button id="registerSubmit" type="submit" class="w-100 btn btn-dark rounded-0 fw-bold text-uppercase py-3" style="font-size: 0.85rem; letter-spacing: 2px;">Register Account</button>
+            </form>
+
+            @if ((Model.ExternalLogins?.Count ?? 0) > 0)
+            {
+                <div class="mt-5 pt-4 border-top text-center">
+                    <p class="small text-muted text-uppercase fw-bold mb-3">Institutional Access Providers</p>
+                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                        @foreach (var provider in Model.ExternalLogins!)
+                        {
+                            <button type="submit" class="btn btn-outline-dark rounded-0 fw-bold text-uppercase mb-2 mx-1" name="provider" value="@provider.Name">@provider.DisplayName</button>
+                        }
                     </form>
-                }
+                </div>
             }
-        </section>
+        </div>
     </div>
 </div>
 

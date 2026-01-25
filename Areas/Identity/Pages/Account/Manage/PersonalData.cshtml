@@ -5,20 +5,24 @@
     ViewData["ActivePage"] = ManageNavPages.PersonalData;
 }
 
-<h3>@ViewData["Title"]</h3>
+<h3 class="fw-bold text-uppercase mb-4" style="font-size: 1.2rem; letter-spacing: 1px;">@ViewData["Title"]</h3>
 
 <div class="row">
-    <div class="col-md-6">
-        <p>Your account contains personal data that you have given us. This page allows you to download or delete that data.</p>
-        <p>
-            <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
-        </p>
-        <form id="download-data" asp-page="DownloadPersonalData" method="post">
-            <button class="btn btn-primary" type="submit">Download</button>
-        </form>
-        <p>
-            <a id="delete" asp-page="DeletePersonalData" class="btn btn-danger">Delete</a>
-        </p>
+    <div class="col-md-8">
+        <div class="bg-light p-4 border mb-4">
+            <p class="small text-muted mb-3">Your account contains personal data that you have provided to the institution. You may export this information for your records or request the permanent removal of your digital footprint from our archives.</p>
+            <p class="small text-dark fw-bold text-uppercase" style="letter-spacing: 0.5px;">
+                Warning: Deleting this data will permanently dissolve your account and access. This action is irreversible.
+            </p>
+        </div>
+
+        <div class="d-flex flex-column gap-3">
+            <form id="download-data" asp-page="DownloadPersonalData" method="post">
+                <button class="btn btn-dark rounded-0 px-4 fw-bold text-uppercase w-100" style="font-size: 0.75rem; height: 45px;" type="submit">Download Archive</button>
+            </form>
+            
+            <a id="delete" asp-page="DeletePersonalData" class="btn btn-outline-danger rounded-0 px-4 fw-bold text-uppercase w-100" style="font-size: 0.75rem; height: 45px; display: flex; align-items: center; justify-content: center;">Delete Account</a>
+        </div>
     </div>
 </div>
 
