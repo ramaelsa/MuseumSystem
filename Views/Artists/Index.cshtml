@@ -28,7 +28,7 @@
         </form>
     </div>
 
-    <div class="row row-cols-1 row-cols-md-3 g-4">
+    <div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
         @foreach (var item in Model) {
             <div class="col">
                 <div class="card h-100 border-0 shadow-sm bg-light rounded-0">
@@ -53,4 +53,40 @@
             </div>
         }
     </div>
-</div>
+
+    @{
+        var prevDisabled = (int)ViewData["CurrentPage"] <= 1 ? "disabled" : "";
+        var nextDisabled = (int)ViewData["CurrentPage"] >= (int)ViewData["TotalPages"] ? "disabled" : "";
+    }
+
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            <li class="page-item @prevDisabled">
+                <a class="page-link rounded-0 border-dark text-dark" 
+                   asp-action="Index" 
+                   asp-route-pageNumber="@((int)ViewData["CurrentPage"] - 1)" 
+                   asp-route-sortOrder="@ViewData["CurrentSort"]" 
+                   asp-route-searchString="@ViewData["SearchString"]">Previous</a>
+            </li>
+
+            @for (int i = 1; i <= (int)ViewData["TotalPages"]; i++)
+            {
+                <li class="page-item @(i == (int)ViewData["CurrentPage"] ? "active" : "")">
+                    <a class="page-link border-dark @(i == (int)ViewData["CurrentPage"] ? "bg-dark border-dark text-white" : "text-dark")" 
+                       asp-action="Index" 
+                       asp-route-pageNumber="@i"
+                       asp-route-sortOrder="@ViewData["CurrentSort"]" 
+                       asp-route-searchString="@ViewData["SearchString"]">@i</a>
+                </li>
+            }
+
+            <li class="page-item @nextDisabled">
+                <a class="page-link rounded-0 border-dark text-dark" 
+                   asp-action="Index" 
+                   asp-route-pageNumber="@((int)ViewData["CurrentPage"] + 1)"
+                   asp-route-sortOrder="@ViewData["CurrentSort"]" 
+                   asp-route-searchString="@ViewData["SearchString"]">Next</a>
+            </li>
+        </ul>
+    </nav>
+    </div>
