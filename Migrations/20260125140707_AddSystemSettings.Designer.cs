@@ -12,8 +12,8 @@ using MuseumSystem.Models;
 namespace MuseumSystem.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260124162726_InitialDockerMSSQL")]
-    partial class InitialDockerMSSQL
+    [Migration("20260125140707_AddSystemSettings")]
+    partial class AddSystemSettings
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -303,6 +303,34 @@ namespace MuseumSystem.Migrations
                     b.HasIndex("ArtistId");
 
                     b.ToTable("Exhibits");
+                });
+
+            modelBuilder.Entity("MuseumSystem.Models.SystemSetting", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Value")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SystemSettings");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Key = "TicketPrice",
+                            Value = 25.00m
+                        });
                 });
 
             modelBuilder.Entity("MuseumSystem.Models.Ticket", b =>

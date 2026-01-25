@@ -12,8 +12,8 @@ using MuseumSystem.Models;
 namespace MuseumSystem.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260124160208_InitialCreateMSSQL")]
-    partial class InitialCreateMSSQL
+    [Migration("20260125133634_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

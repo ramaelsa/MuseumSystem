@@ -17,10 +17,9 @@ namespace MuseumSystem.Controllers
 
         public async Task<IActionResult> Index()
         {
-            List<AuditLog> logs = await _context.AuditLogs
+            var logs = await _context.AuditLogs
                 .OrderByDescending(l => l.DateTime)
                 .ToListAsync();
-                
             return View(logs);
         }
     }

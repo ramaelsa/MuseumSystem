@@ -1,0 +1,21 @@
+@model MuseumSystem.Models.SystemSetting
+
+@{
+    ViewData["Title"] = "Update Pricing";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-4 text-center">
+            <h2 class="fw-bold text-uppercase mb-4">Pricing Control</h2>
+            <form asp-action="SetPrice" method="post" class="border p-4 bg-light">
+                @Html.AntiForgeryToken()
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Current Global Price</label>
+                    <input type="number" step="0.01" name="newValue" value="@Model.Value" class="form-control text-center fs-3" />
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Update All Future Tickets</button>
+            </form>
+        </div>
+    </div>
+</div>

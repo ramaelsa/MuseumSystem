@@ -6,7 +6,6 @@ using System.Security.Claims;
 
 namespace MuseumSystem.Controllers
 {
-    [Route("api/[controller]")]
     public class TicketsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -16,138 +15,43 @@ namespace MuseumSystem.Controllers
             _context = context;
         }
 
-        // GET: api/Tickets
-        [HttpGet]
-        [AllowAnonymous]
-        public async Task<IActionResult> Index(string searchString, string sortOrder, int pageNumber = 1)
+        public async Task<IActionResult> Index()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            
-            // Start the query based on who is asking
             var query = _context.Tickets.AsQueryable();
 
-            if (User.IsInRole("Admin"))
+            if (!User.IsInRole("Admin"))
             {
-                // Admins see everything
-            }
-            else if (User.Identity.IsAuthenticated)
-            {
-                // Regular users only see their own stuff
                 query = query.Where(t => t.UserId == userId);
             }
-            else
-            {
-                // Not logged in? You get nothing.
-                query = query.Where(t => false);
-            }
 
-            //  Search by Visitor Name (Criteria #3)
-            if (!string.IsNullOrEmpty(searchString))
-            {
-                query = query.Where(t => t.VisitorName.Contains(searchString));
-            }
-
-            // Sorting by Date 
-            ViewData["DateSortParm"] = sortOrder == "date_asc" ? "date_desc" : "date_asc";
-            switch (sortOrder)
-            {
-                case "date_asc":
-                    query = query.OrderBy(t => t.VisitDate);
-                    break;
-                default:
-                    query = query.OrderByDescending(t => t.VisitDate);
-                    break;
-            }
-
-            //  Pagination
-            int pageSize = 10; // We can show more tickets per page than exhibits
-            var totalItems = await query.CountAsync();
-            var tickets = await query
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
-            // Pass info to the frontend team
-            ViewData["TotalPages"] = (int)Math.Ceiling(totalItems / (double)pageSize);
-            ViewData["CurrentPage"] = pageNumber;
-
-            if (Request.Headers["Accept"].ToString().Contains("text/html"))
-                return View(tickets);
-
-            return Ok(new
-            {
-                totalItems,
-                totalPages = ViewData["TotalPages"],
-                currentPage = pageNumber,
-                data = tickets
-            });
+            return View(await query.ToListAsync());
         }
 
-        [HttpGet("{id}")]
-        [Authorize]
-        public async Task<IActionResult> Details(int id)
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Edit(int? id)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var ticket = await _context.Tickets.FirstOrDefaultAsync(t => t.Id == id);
-
+            if (id == null) return NotFound();
+            var ticket = await _context.Tickets.FindAsync(id);
             if (ticket == null) return NotFound();
-
-            // Safety check: Don't let users peek at other people's tickets
-            if (!User.IsInRole("Admin") && ticket.UserId != userId)
-                return Forbid();
-
-            if (Request.Headers["Accept"].ToString().Contains("text/html"))
-                return View(ticket);
-
-            return Ok(ticket);
+            return View(ticket);
         }
 
         [HttpPost]
-        [Authorize]
-        public async Task<IActionResult> Create([FromBody] Ticket ticket)
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            ticket.UserId = userId;
-
-            // One ticket per day rule 
-            bool alreadyHasTicket = await _context.Tickets
-                .AnyAsync(t => t.UserId == userId && t.VisitDate.Date == ticket.VisitDate.Date);
-
-            if (alreadyHasTicket)
-            {
-                ModelState.AddModelError("VisitDate", "You already have a reservation for this date.");
-            }
-
-            if (ModelState.IsValid)
-            {
-                _context.Add(ticket);
-                
-                // Logging the action for the bonus points
-                _context.AuditLogs.Add(new AuditLog
-                {
-                    UserId = userId,
-                    Action = "Create",
-                    EntityName = "Ticket",
-                    DateTime = DateTime.Now,
-                    Details = $"Ticket created for {ticket.VisitorName} on {ticket.VisitDate.ToShortDateString()}"
-                });
-
-                await _context.SaveChangesAsync();
-
-                if (Request.Headers["Accept"].ToString().Contains("text/html"))
-                    return RedirectToAction(nameof(Index));
-
-                return CreatedAtAction(nameof(Details), new { id = ticket.Id }, ticket);
-            }
-
-            return BadRequest(ModelState);
-        }
-
-        [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Edit(int id, [FromBody] Ticket ticket)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, string reasonForChange, [Bind("Id,VisitorName,VisitDate")] Ticket ticket)
         {
-            if (id != ticket.Id) return BadRequest();
+            if (id != ticket.Id) return NotFound();
+
+            var originalTicket = await _context.Tickets.AsNoTracking().FirstOrDefaultAsync(t => t.Id == id);
+            if (originalTicket == null) return NotFound();
+
+            ticket.Price = originalTicket.Price;
+            ticket.UserId = originalTicket.UserId;
+
+            ModelState.Remove("UserId");
+            ModelState.Remove("Price");
 
             if (ModelState.IsValid)
             {
@@ -157,10 +61,10 @@ namespace MuseumSystem.Controllers
                     _context.AuditLogs.Add(new AuditLog
                     {
                         UserId = User.FindFirstValue(ClaimTypes.NameIdentifier),
-                        Action = "Edit",
+                        Action = "Admin Correction",
                         EntityName = "Ticket",
                         DateTime = DateTime.Now,
-                        Details = $"Admin updated Ticket ID {id}"
+                        Details = $"Ticket {id} modified. Reason: {reasonForChange}. Price maintained at {originalTicket.Price}."
                     });
                     await _context.SaveChangesAsync();
                 }
@@ -169,64 +73,95 @@ namespace MuseumSystem.Controllers
                     if (!_context.Tickets.Any(e => e.Id == ticket.Id)) return NotFound();
                     else throw;
                 }
-                return NoContent();
+                return RedirectToAction(nameof(Index));
             }
-            return BadRequest(ModelState);
+            return View(ticket);
         }
 
-        [HttpDelete("{id}")]
         [Authorize]
-        public async Task<IActionResult> Cancel(int id)
+        public async Task<IActionResult> Create()
+        {
+            var priceSetting = await _context.SystemSettings.FirstOrDefaultAsync(s => s.Key == "TicketPrice");
+            ViewBag.CurrentPrice = priceSetting?.Value ?? 25.00m;
+            return View();
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(Ticket ticket)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var ticket = await _context.Tickets.FirstOrDefaultAsync(t => t.Id == id);
+            var priceSetting = await _context.SystemSettings.FirstOrDefaultAsync(s => s.Key == "TicketPrice");
+            
+            ticket.UserId = userId;
+            ticket.Price = priceSetting?.Value ?? 25.00m;
 
-            if (ticket == null) return NotFound();
+            ModelState.Remove("UserId");
+            ModelState.Remove("Price");
 
-            if (!User.IsInRole("Admin") && ticket.UserId != userId)
-                return Forbid();
-
-            string actionType = User.IsInRole("Admin") ? "Delete" : "Cancel";
-
-            _context.AuditLogs.Add(new AuditLog
+            if (ModelState.IsValid)
             {
-                UserId = userId,
-                Action = actionType,
-                EntityName = "Ticket",
-                DateTime = DateTime.Now,
-                Details = $"{actionType} action on Ticket ID {id}"
-            });
-
-            _context.Tickets.Remove(ticket);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+                _context.Add(ticket);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            ViewBag.CurrentPrice = ticket.Price;
+            return View(ticket);
         }
 
-
-        [HttpGet("Create")]
-        [Authorize]
-        [ApiExplorerSettings(IgnoreApi = true)]
-        public IActionResult Create() => View();
-
-        [HttpGet("Edit/{id}")]
         [Authorize(Roles = "Admin")]
-        [ApiExplorerSettings(IgnoreApi = true)]
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> SetPrice()
         {
-            if (id == null) return NotFound();
-            var ticket = await _context.Tickets.FindAsync(id);
-            return ticket == null ? NotFound() : View(ticket);
+            var setting = await _context.SystemSettings.FirstOrDefaultAsync(s => s.Key == "TicketPrice");
+            return View(setting);
         }
 
-        [HttpGet("Delete/{id}")]
+        [HttpPost]
         [Authorize(Roles = "Admin")]
-        [ApiExplorerSettings(IgnoreApi = true)]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SetPrice(decimal newValue)
+        {
+            var setting = await _context.SystemSettings.FirstOrDefaultAsync(s => s.Key == "TicketPrice");
+            if (setting != null)
+            {
+                setting.Value = newValue;
+                _context.Update(setting);
+                _context.AuditLogs.Add(new AuditLog
+                {
+                    UserId = User.FindFirstValue(ClaimTypes.NameIdentifier),
+                    Action = "Price Update",
+                    EntityName = "SystemSetting",
+                    DateTime = DateTime.Now,
+                    Details = $"Global price set to {newValue}."
+                });
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction(nameof(Index));
+        }
+
+        [Authorize]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
             var ticket = await _context.Tickets.FirstOrDefaultAsync(m => m.Id == id);
-            return ticket == null ? NotFound() : View(ticket);
+            if (ticket == null) return NotFound();
+            if (!User.IsInRole("Admin") && ticket.UserId != User.FindFirstValue(ClaimTypes.NameIdentifier)) return Forbid();
+            return View(ticket);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var ticket = await _context.Tickets.FindAsync(id);
+            if (ticket != null)
+            {
+                _context.Tickets.Remove(ticket);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction(nameof(Index));
         }
     }
 }

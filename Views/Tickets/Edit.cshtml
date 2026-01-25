@@ -1,45 +1,47 @@
 @model MuseumSystem.Models.Ticket
 
 @{
-    ViewData["Title"] = "Edit";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Correction";
 }
 
-<h1>Edit</h1>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h2 class="fw-bold text-uppercase letter-spacing-2 mb-4">Ticket Correction</h2>
+            <div class="border p-4 bg-white shadow-sm">
+                <form asp-action="Edit" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Id" />
+                    
+                    <div class="mb-4 pb-3 border-bottom">
+                        <label class="small fw-bold text-muted text-uppercase">Payment Record</label>
+                        <div class="fs-4 font-monospace">@Model.Price.ToString("C")</div>
+                        <small class="text-danger">Financial data is locked for historical accuracy.</small>
+                    </div>
 
-<h4>Ticket</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="VisitorName" class="control-label"></label>
-                <input asp-for="VisitorName" class="form-control" />
-                <span asp-validation-for="VisitorName" class="text-danger"></span>
+                    <div class="mb-3">
+                        <label asp-for="VisitorName" class="form-label small fw-bold text-uppercase"></label>
+                        <input asp-for="VisitorName" class="form-control rounded-0 border-dark" />
+                        <span asp-validation-for="VisitorName" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="VisitDate" class="form-label small fw-bold text-uppercase"></label>
+                        <input asp-for="VisitDate" type="date" class="form-control rounded-0 border-dark" value="@Model.VisitDate.ToString("yyyy-MM-dd")" />
+                        <span asp-validation-for="VisitDate" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-uppercase text-danger">Internal Note / Reason</label>
+                        <textarea name="reasonForChange" class="form-control rounded-0 border-dark" rows="3" required placeholder="Describe why this correction is necessary..."></textarea>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-dark rounded-0 py-2 fw-bold">SAVE CORRECTION</button>
+                        <a asp-action="Index" class="btn btn-outline-secondary rounded-0 py-2 fw-bold">DISCARD CHANGES</a>
+                    </div>
+                </form>
             </div>
-            <div class="form-group">
-                <label asp-for="VisitDate" class="control-label"></label>
-                <input asp-for="VisitDate" class="form-control" />
-                <span asp-validation-for="VisitDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Price" class="control-label"></label>
-                <input asp-for="Price" class="form-control" />
-                <span asp-validation-for="Price" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
 </div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}

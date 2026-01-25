@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Visitor Information";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <div class="container mt-5">
@@ -70,15 +71,14 @@
                                 <div class="d-flex justify-content-end align-items-center gap-2">
                                     @if (User.IsInRole("Admin"))
                                     {
-                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-link text-secondary">Edit</a>
-                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-link text-danger">Void</a>
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-link text-secondary text-decoration-none">Edit</a>
+                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-link text-danger text-decoration-none">Void</a>
                                     }
                                     else
                                     {
-                                        <span class="badge bg-success text-uppercase mr-2">Confirmed</span>
-                                        <form asp-action="Cancel" asp-route-id="@item.Id" method="post" onsubmit="return confirm('Are you sure you want to cancel this ticket?');">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-0 px-2" style="font-size: 0.7rem;">CANCEL</button>
-                                        </form>
+                                        <span class="badge bg-success text-uppercase me-2">Confirmed</span>
+                                        @* Changed asp-action from "Cancel" to "Delete" to match Controller *@
+                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger rounded-0 px-2" style="font-size: 0.7rem;">CANCEL</a>
                                     }
                                 </div>
                             </td>
