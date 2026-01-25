@@ -1,20 +1,32 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using MuseumSystem.Models;
 
 namespace MuseumSystem.Controllers;
 
 public class HomeController : Controller
 {
-    private readonly ILogger<HomeController> _logger;
+    private readonly ApplicationDbContext _context;
 
-    public HomeController(ILogger<HomeController> logger)
+    public HomeController(ApplicationDbContext context)
     {
-        _logger = logger;
+        _context = context;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
+        if (User.IsInRole("Admin"))
+        {
+            ViewBag.TotalTickets = await _context.Tickets.CountAsync();
+            ViewBag.TotalRevenue = await _context.Tickets.SumAsync(t => t.Price);
+            ViewBag.TotalUsers = await _context.Users.CountAsync();
+            ViewBag.RecentLogs = await _context.AuditLogs
+                .OrderByDescending(l => l.DateTime)
+                .Take(5)
+                .ToListAsync();
+        }
+
         return View();
     }
 
