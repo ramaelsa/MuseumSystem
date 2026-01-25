@@ -25,10 +25,22 @@
         {
             <div class="col">
                 <div class="card h-100 border-0 shadow-sm bg-light rounded-0">
+                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+                    {
+                        <div style="height: 300px; overflow: hidden;">
+                            <img src="@item.ImageUrl" class="card-img-top rounded-0 w-100 h-100" style="object-fit: cover;" alt="@item.FullName">
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="bg-secondary d-flex align-items-center justify-content-center text-white" style="height: 300px;">
+                            <i class="bi bi-person-fill" style="font-size: 4rem;"></i>
+                        </div>
+                    }
                     <div class="card-body p-4">
-                        <h4 class="fw-bold mb-3">@Html.DisplayFor(modelItem => item.FullName)</h4>
+                        <h4 class="fw-bold mb-3">@item.FullName</h4>
                         <p class="text-muted small" style="line-height: 1.6; height: 4.8em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">
-                            @Html.DisplayFor(modelItem => item.Bio)
+                            @item.Bio
                         </p>
                     </div>
                     <div class="card-footer bg-white border-0 p-4 pt-0">

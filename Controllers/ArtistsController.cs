@@ -32,7 +32,7 @@ namespace MuseumSystem.Controllers
         [HttpPost]
         [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,FullName,Bio")] Artist artist)
+        public async Task<IActionResult> Create([Bind("Id,FullName,Bio,ImageUrl")] Artist artist)
         {
             if (ModelState.IsValid)
             {
@@ -55,13 +55,22 @@ namespace MuseumSystem.Controllers
         [HttpPost]
         [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,FullName,Bio")] Artist artist)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,FullName,Bio,ImageUrl")] Artist artist)
         {
             if (id != artist.Id) return NotFound();
+
             if (ModelState.IsValid)
             {
-                _context.Update(artist);
-                await _context.SaveChangesAsync();
+                try
+                {
+                    _context.Update(artist);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!ArtistExists(artist.Id)) return NotFound();
+                    else throw;
+                }
                 return RedirectToAction(nameof(Index));
             }
             return View(artist);
@@ -95,6 +104,11 @@ namespace MuseumSystem.Controllers
             if (artist != null) _context.Artists.Remove(artist);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        private bool ArtistExists(int id)
+        {
+            return _context.Artists.Any(e => e.Id == id);
         }
     }
 }

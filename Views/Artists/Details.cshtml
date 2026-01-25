@@ -1,49 +1,45 @@
 @model MuseumSystem.Models.Artist
 
 @{
-    ViewData["Title"] = Model.FullName + " - Biography";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = Model.FullName;
 }
 
 <div class="container mt-5">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a asp-action="Index" class="text-dark">Artists</a></li>
-            <li class="breadcrumb-item active text-muted" aria-current="page">@Model.FullName</li>
-        </ol>
-    </nav>
-
-    <div class="row mt-4">
-        <div class="col-md-8">
-            <h1 class="fw-bold text-uppercase border-bottom pb-3 mb-4" style="letter-spacing: 2px;">
-                @Html.DisplayFor(model => model.FullName)
-            </h1>
-            
-            <div class="artist-bio-content mb-5" style="font-size: 1.1rem; line-height: 1.8; color: #333;">
-                <h5 class="text-muted small fw-bold text-uppercase mb-3">Biography</h5>
-                @Html.DisplayFor(model => model.Bio)
-            </div>
-
-            <div class="d-flex align-items-center gap-3">
-                <a asp-action="Index" class="btn btn-outline-dark rounded-0 px-4">
-                    <i class="bi bi-arrow-left me-2"></i>BACK TO COLLECTION
-                </a>
-
-                @* ONLY ADMIN CAN SEE EDIT BUTTON *@
-                @if (User.IsInRole("Admin"))
-                {
-                    <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-dark rounded-0 px-4">
-                        <i class="bi bi-pencil-square me-2"></i>EDIT ARTIST
-                    </a>
-                }
-            </div>
+    <div class="row g-5">
+        <div class="col-md-5">
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <img src="@Model.ImageUrl" alt="@Model.FullName" class="img-fluid shadow-lg border border-dark p-2 bg-white" style="width: 100%; object-fit: cover;" />
+            }
+            else
+            {
+                <div class="bg-light d-flex align-items-center justify-content-center border border-dark" style="height: 400px;">
+                    <i class="bi bi-person-bounding-box text-muted" style="font-size: 4rem;"></i>
+                </div>
+            }
         </div>
 
-        <div class="col-md-4">
-            <div class="card bg-light border-0 rounded-0 p-4">
-                <h6 class="fw-bold text-uppercase small mb-3">Archival Information</h6>
-                <p class="small text-muted mb-1">Entry ID: @Model.Id</p>
-                <p class="small text-muted">Status: On Display</p>
+        <div class="col-md-7">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-4">
+                    <li class="breadcrumb-item"><a asp-action="Index" class="text-dark text-uppercase small fw-bold">Collection</a></li>
+                    <li class="breadcrumb-item active small text-uppercase" aria-current="page">@Model.FullName</li>
+                </ol>
+            </nav>
+
+            <h1 class="display-4 fw-bold text-uppercase mb-3" style="letter-spacing: -1px;">@Model.FullName</h1>
+            <div class="bg-gold mb-4" style="height: 4px; width: 80px; background-color: #b2945e;"></div>
+            
+            <div class="artist-bio mb-5" style="font-size: 1.15rem; line-height: 1.8; color: #222; text-align: justify;">
+                @Model.Bio
+            </div>
+
+            <div class="d-flex gap-2">
+                <a asp-action="Index" class="btn btn-outline-dark rounded-0 px-4 fw-bold">BACK TO ARTISTS</a>
+                @if (User.IsInRole("Admin"))
+                {
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-dark rounded-0 px-4 fw-bold">EDIT PROFILE</a>
+                }
             </div>
         </div>
     </div>

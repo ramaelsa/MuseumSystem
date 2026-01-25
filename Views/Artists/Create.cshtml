@@ -1,37 +1,43 @@
 @model MuseumSystem.Models.Artist
 
 @{
-    ViewData["Title"] = "Create Artist";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "New Contributor";
 }
 
-<div class="container mt-4">
-    <h1>Create Artist</h1>
-    <h4>New Contributor</h4>
-    <hr />
-    <div class="row">
+<div class="container py-5">
+    <div class="row justify-content-center">
         <div class="col-md-6">
-            <form asp-controller="Artists" asp-action="Create" method="post">
-                @Html.AntiForgeryToken()
-                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <div class="border border-dark p-5 shadow-sm">
+                <h2 class="fw-bold text-uppercase mb-4 text-center">New Contributor</h2>
+                
+                <form asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3 small"></div>
 
-                <div class="mb-3">
-                    <label asp-for="FullName" class="form-label fw-bold"></label>
-                    <input asp-for="FullName" class="form-control" placeholder="e.g., Caspar David Friedrich" />
-                    <span asp-validation-for="FullName" class="text-danger"></span>
-                </div>
+                    <div class="mb-4">
+                        <label asp-for="FullName" class="form-label small fw-bold text-uppercase">Full Artist Name</label>
+                        <input asp-for="FullName" class="form-control rounded-0 border-dark" placeholder="e.g. Leonardo da Vinci" />
+                        <span asp-validation-for="FullName" class="text-danger small"></span>
+                    </div>
 
-                <div class="mb-3">
-                    <label asp-for="Bio" class="form-label fw-bold"></label>
-                    <textarea asp-for="Bio" class="form-control" rows="4" placeholder="Brief biography..."></textarea>
-                    <span asp-validation-for="Bio" class="text-danger"></span>
-                </div>
+                    <div class="mb-4">
+                        <label asp-for="ImageUrl" class="form-label small fw-bold text-uppercase">Profile Image URL</label>
+                        <input asp-for="ImageUrl" class="form-control rounded-0 border-dark" placeholder="https://..." />
+                        <span asp-validation-for="ImageUrl" class="text-danger small"></span>
+                    </div>
 
-                <div class="mt-4">
-                    <button type="submit" class="btn btn-primary px-4">Create Artist</button>
-                    <a asp-action="Index" class="btn btn-outline-secondary px-4">Back to List</a>
-                </div>
-            </form>
+                    <div class="mb-4">
+                        <label asp-for="Bio" class="form-label small fw-bold text-uppercase">Biography</label>
+                        <textarea asp-for="Bio" class="form-control rounded-0 border-dark" rows="6"></textarea>
+                        <span asp-validation-for="Bio" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-dark rounded-0 fw-bold py-2">REGISTER ARTIST</button>
+                        <a asp-action="Index" class="btn btn-outline-dark rounded-0 fw-bold py-2">CANCEL</a>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
