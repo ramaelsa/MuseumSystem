@@ -18,9 +18,18 @@ namespace MuseumSystem.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString)
         {
-            return View(await _context.Artists.ToListAsync());
+            var query = _context.Artists.AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                query = query.Where(a => a.FullName.Contains(searchString) || a.Bio.Contains(searchString));
+            }
+
+            ViewData["SearchString"] = searchString;
+
+            return View(await query.ToListAsync());
         }
 
         [Authorize(Roles = "Admin")]

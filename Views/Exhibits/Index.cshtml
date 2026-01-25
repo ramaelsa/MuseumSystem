@@ -6,19 +6,45 @@ Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-5">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5 gap-3">
         <div>
             <h1 class="display-5 fw-bold mb-0">Museum Gallery</h1>
             <p class="text-muted text-uppercase small ls-2" style="letter-spacing: 2px;">Current Collections</p>
         </div>
 
-        @if (User.IsInRole("Admin"))
-        {
-        <a asp-action="Create" class="btn btn-dark rounded-0 px-4 py-2 fw-bold text-uppercase small">
-            <i class="bi bi-plus-lg me-2"></i> Register New Exhibit
-        </a>
-        }
+        <div class="d-flex gap-2 align-items-center">
+            <form asp-action="Index" method="get" class="d-flex gap-2">
+                <div class="input-group">
+                    <input type="text" name="searchString" value="@ViewData["SearchString"]"
+                           class="form-control rounded-0 border-dark shadow-none small"
+                           placeholder="Search masterpiece or artist..." style="min-width: 250px;">
+                    <button class="btn btn-dark rounded-0" type="submit">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+                @if (!string.IsNullOrEmpty(ViewData["SearchString"]?.ToString()))
+                {
+                <a asp-action="Index" class="btn btn-outline-secondary rounded-0">Clear</a>
+                }
+            </form>
+
+            @if (User.IsInRole("Admin"))
+            {
+            <a asp-action="Create" class="btn btn-dark rounded-0 px-4 py-2 fw-bold text-uppercase small ms-md-2">
+                <i class="bi bi-plus-lg me-2"></i> Register
+            </a>
+            }
+        </div>
     </div>
+
+    @if (!Model.Any())
+    {
+    <div class="text-center py-5 border border-dashed">
+        <i class="bi bi-search text-muted display-1"></i>
+        <p class="mt-3 text-uppercase fw-bold text-muted">No masterpieces found for "@ViewData["SearchString"]"</p>
+        <a asp-action="Index" class="text-dark small fw-bold">SHOW ALL COLLECTION</a>
+    </div>
+    }
 
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
         @foreach (var item in Model)
@@ -85,5 +111,9 @@ Layout = "~/Views/Shared/_Layout.cshtml";
     .card:hover {
         transform: translateY(-8px);
         box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important;
+    }
+    .border-dashed {
+        border-style: dashed !important;
+        border-width: 2px !important;
     }
 </style>

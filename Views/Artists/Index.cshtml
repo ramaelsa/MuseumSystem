@@ -6,19 +6,45 @@
 }
 
 <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-5">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5 gap-3">
         <div>
             <h1 class="fw-bold text-uppercase mb-0" style="letter-spacing: 3px;">The Masters</h1>
             <p class="text-muted small uppercase">Archival Artist Directory</p>
         </div>
 
-        @if (User.IsInRole("Admin"))
-        {
-            <a asp-action="Create" class="btn btn-dark rounded-0 px-4 fw-bold shadow-sm">
-                <i class="bi bi-plus-lg me-2"></i>ADD NEW ARTIST
-            </a>
-        }
+        <div class="d-flex gap-2 align-items-center">
+            <form asp-action="Index" method="get" class="d-flex gap-2">
+                <div class="input-group">
+                    <input type="text" name="searchString" value="@ViewData["SearchString"]" 
+                           class="form-control rounded-0 border-dark shadow-none small" 
+                           placeholder="Search for a Master..." style="min-width: 250px;">
+                    <button class="btn btn-dark rounded-0" type="submit">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+                @if (!string.IsNullOrEmpty(ViewData["SearchString"]?.ToString()))
+                {
+                    <a asp-action="Index" class="btn btn-outline-secondary rounded-0">Clear</a>
+                }
+            </form>
+
+            @if (User.IsInRole("Admin"))
+            {
+                <a asp-action="Create" class="btn btn-dark rounded-0 px-4 fw-bold shadow-sm ms-md-2">
+                    <i class="bi bi-plus-lg me-2"></i>ADD NEW
+                </a>
+            }
+        </div>
     </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5 border border-dashed">
+            <i class="bi bi-person-x text-muted display-1"></i>
+            <p class="mt-3 text-uppercase fw-bold text-muted">No artists found for "@ViewData["SearchString"]"</p>
+            <a asp-action="Index" class="text-dark small fw-bold">RESTORE DIRECTORY</a>
+        </div>
+    }
 
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
         @foreach (var item in Model)
@@ -63,3 +89,10 @@
         }
     </div>
 </div>
+
+<style>
+    .border-dashed {
+        border-style: dashed !important;
+        border-width: 2px !important;
+    }
+</style>

@@ -32,7 +32,9 @@ namespace MuseumSystem.Controllers
 
             if (!string.IsNullOrEmpty(searchString))
             {
-                query = query.Where(e => e.Name.Contains(searchString) || e.Description.Contains(searchString));
+                query = query.Where(e => e.Name.Contains(searchString) || 
+                                       e.Description.Contains(searchString) || 
+                                       e.Artist.FullName.Contains(searchString));
             }
 
             if (isActive.HasValue)
@@ -51,7 +53,6 @@ namespace MuseumSystem.Controllers
             }
 
             var results = await query.ToListAsync();
-
             return View(results);
         }
 
