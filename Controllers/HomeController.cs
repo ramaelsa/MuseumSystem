@@ -19,7 +19,9 @@ public class HomeController : Controller
         if (User.IsInRole("Admin"))
         {
             ViewBag.TotalTickets = await _context.Tickets.CountAsync();
-            ViewBag.TotalRevenue = await _context.Tickets.SumAsync(t => t.Price);
+            ViewBag.TotalRevenue = await _context.Tickets.AnyAsync() 
+                ? await _context.Tickets.SumAsync(t => t.Price) 
+                : 0m;
             ViewBag.TotalUsers = await _context.Users.CountAsync();
             ViewBag.RecentLogs = await _context.AuditLogs
                 .OrderByDescending(l => l.DateTime)
@@ -27,6 +29,11 @@ public class HomeController : Controller
                 .ToListAsync();
         }
 
+        return View();
+    }
+
+    public IActionResult About()
+    {
         return View();
     }
 

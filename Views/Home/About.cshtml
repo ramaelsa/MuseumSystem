@@ -1,0 +1,48 @@
+@{
+    ViewData["Title"] = "About Museum Core";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="text-center mb-5">
+                <h1 class="display-4 fw-bold text-uppercase letter-spacing-5">Our Heritage</h1>
+                <div class="bg-dark mx-auto my-3" style="height: 2px; width: 60px;"></div>
+                <p class="lead font-serif">A digital sanctuary for fine arts management and historical preservation.</p>
+            </div>
+
+            <div class="mb-5">
+                <h3 class="fw-bold text-uppercase mb-3">Institutional Mission</h3>
+                <p class="text-secondary" style="line-height: 1.8;">
+                    Founded in 2026, Museum Core serves as the primary digital repository for institutional archives. 
+                    Our mission is to bridge the gap between historical masterpieces and modern management, 
+                    ensuring that every artist's legacy is preserved with technical precision and aesthetic respect.
+                </p>
+            </div>
+
+            @if (User.IsInRole("Admin"))
+            {
+                <div class="p-4 border border-dark bg-light mb-5">
+                    <h5 class="fw-bold text-uppercase"><i class="bi bi-shield-lock me-2"></i>Admin Note</h5>
+                    <p class="small m-0">This platform is currently operating under institutional security protocols. 
+                    All modifications to Artist and Exhibit records are logged in the security audit trail.</p>
+                </div>
+            }
+
+            <div class="row text-center g-4">
+                <div class="col-md-4">
+                    <h2 class="fw-bold">100%</h2>
+                    <p class="text-muted small text-uppercase">Digital Accuracy</p>
+                </div>
+                <div class="col-md-4">
+                    <h2 class="fw-bold">24/7</h2>
+                    <p class="text-muted small text-uppercase">Archive Access</p>
+                </div>
+                <div class="col-md-4">
+                    <h2 class="fw-bold">SECURE</h2>
+                    <p class="text-muted small text-uppercase">Data Encryption</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

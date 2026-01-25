@@ -18,20 +18,17 @@ namespace MuseumSystem.Controllers
             _context = context;
         }
 
-        // GET: Artists
         public async Task<IActionResult> Index()
         {
             return View(await _context.Artists.ToListAsync());
         }
 
-        // GET: Artists/Create
         [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Artists/Create
         [HttpPost]
         [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
@@ -46,18 +43,58 @@ namespace MuseumSystem.Controllers
             return View(artist);
         }
 
-        // GET: Artists/Details/5
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null) return NotFound();
+            var artist = await _context.Artists.FindAsync(id);
+            if (artist == null) return NotFound();
+            return View(artist);
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, [Bind("Id,FullName,Bio")] Artist artist)
+        {
+            if (id != artist.Id) return NotFound();
+            if (ModelState.IsValid)
+            {
+                _context.Update(artist);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            return View(artist);
+        }
+
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
-
             var artist = await _context.Artists
                 .Include(a => a.Exhibits)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            
             if (artist == null) return NotFound();
-
             return View(artist);
+        }
+
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null) return NotFound();
+            var artist = await _context.Artists.FirstOrDefaultAsync(m => m.Id == id);
+            if (artist == null) return NotFound();
+            return View(artist);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [Authorize(Roles = "Admin")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var artist = await _context.Artists.FindAsync(id);
+            if (artist != null) _context.Artists.Remove(artist);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
     }
 }

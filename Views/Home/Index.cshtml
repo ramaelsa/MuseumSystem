@@ -1,5 +1,5 @@
 ﻿@{
-    ViewData["Title"] = "Welcome to Museum Core";
+    ViewData["Title"] = "Museum Core Portal";
 }
 
 @if (User.IsInRole("Admin"))
@@ -28,7 +28,7 @@
             <div class="col-md-4">
                 <div class="card rounded-0 border-dark shadow-sm bg-dark text-white text-center">
                     <div class="card-body py-4">
-                        <h6 class="text-uppercase text-gold small fw-bold" style="color: #b2945e;">Total Revenue</h6>
+                        <h6 class="text-uppercase small fw-bold" style="color: #b2945e;">Total Revenue</h6>
                         <h2 class="display-5 fw-bold">@ViewBag.TotalRevenue.ToString("C")</h2>
                         <div class="small text-muted mt-2">Institutional Earnings</div>
                     </div>
@@ -49,15 +49,18 @@
             <div class="col-md-8">
                 <h5 class="fw-bold text-uppercase mb-4 border-bottom pb-2">Recent Security Activity</h5>
                 <div class="list-group rounded-0 shadow-sm mb-3">
-                    @foreach (var log in (IEnumerable<MuseumSystem.Models.AuditLog>)ViewBag.RecentLogs)
+                    @if (ViewBag.RecentLogs != null)
                     {
-                        <div class="list-group-item border-start-0 border-end-0 py-3">
-                            <div class="d-flex w-100 justify-content-between">
-                                <h6 class="mb-1 fw-bold">@log.Action</h6>
-                                <small class="text-muted font-monospace">@log.DateTime.ToString("MMM dd, HH:mm")</small>
+                        @foreach (var log in (IEnumerable<MuseumSystem.Models.AuditLog>)ViewBag.RecentLogs)
+                        {
+                            <div class="list-group-item border-start-0 border-end-0 py-3">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1 fw-bold">@log.Action</h6>
+                                    <small class="text-muted font-monospace">@log.DateTime.ToString("MMM dd, HH:mm")</small>
+                                </div>
+                                <p class="mb-1 small text-secondary">@log.Details</p>
                             </div>
-                            <p class="mb-1 small text-secondary">@log.Details</p>
-                        </div>
+                        }
                     }
                 </div>
                 <a asp-controller="AuditLogs" asp-action="Index" class="btn btn-sm btn-link text-dark text-decoration-none p-0 fw-bold">VIEW SYSTEM LOGS →</a>
@@ -87,7 +90,7 @@ else
         <div class="row align-items-center">
             <div class="col-lg-6 text-center text-lg-start mb-5 mb-lg-0">
                 <h1 class="display-2 fw-bold text-uppercase letter-spacing-5 mb-0">MUSEUM</h1>
-                <h1 class="display-4 fw-light text-uppercase letter-spacing-5 mb-4" style="color: var(--museum-gold);">CORE</h1>
+                <h1 class="display-4 fw-light text-uppercase letter-spacing-5 mb-4" style="color: #b2945e;">CORE</h1>
                 <p class="lead font-serif italic text-muted mb-5 pe-lg-5">
                     Welcome to the digital heart of our collection. Explore timeless masterpieces, 
                     track historical exhibits, and secure your place in art history.
@@ -96,7 +99,6 @@ else
                     @if (!User.Identity.IsAuthenticated)
                     {
                         <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-dark rounded-0 px-5 py-3 fw-bold text-uppercase">Member Login</a>
-                        <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-outline-dark rounded-0 px-5 py-3 fw-bold text-uppercase">Join Membership</a>
                     }
                     else
                     {
@@ -108,10 +110,10 @@ else
             <div class="col-lg-6">
                 <div class="bg-light p-5 border border-dark text-center shadow">
                     <i class="bi bi-bank" style="font-size: 4rem;"></i>
-                    <h4 class="fw-bold text-uppercase mt-3 mb-0">Today's Entry</h4>
-                    <p class="text-muted small mb-4">Institutional Access Rate</p>
+                    <h4 class="fw-bold text-uppercase mt-3 mb-0">Visitor Entrance</h4>
+                    <p class="text-muted small mb-4">Institutional Access Portal</p>
                     <hr class="mx-5" />
-                    <p class="display-6 fw-bold">Live Rates</p>
+                    <p class="text-secondary small mb-4">Join our community to preserve and explore the fine arts archive.</p>
                     <a asp-controller="Tickets" asp-action="Create" class="btn btn-dark rounded-0 px-4 mt-2">RESERVE A VISIT</a>
                 </div>
             </div>
