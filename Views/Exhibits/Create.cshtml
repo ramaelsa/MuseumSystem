@@ -5,44 +5,57 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container mt-4">
-    <h1>Create Exhibit</h1>
-    <hr />
-    <div class="row">
-        <div class="col-md-6">
-            <form asp-controller="Exhibits" asp-action="Create" method="post">
-                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-                
-                <div class="mb-3">
-                    <label asp-for="Name" class="form-label"></label>
-                    <input asp-for="Name" class="form-control" />
-                    <span asp-validation-for="Name" class="text-danger"></span>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm rounded-0">
+                <div class="card-header bg-dark text-white py-3 rounded-0">
+                    <h5 class="mb-0 text-uppercase fw-bold" style="letter-spacing: 2px;">Register New Exhibit</h5>
                 </div>
+                <div class="card-body p-4 p-md-5">
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
 
-                <div class="mb-3">
-                    <label asp-for="Description" class="form-label"></label>
-                    <textarea asp-for="Description" class="form-control" rows="3"></textarea>
-                    <span asp-validation-for="Description" class="text-danger"></span>
-                </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Name" class="form-label fw-bold small text-uppercase">Piece Name</label>
+                                <input asp-for="Name" class="form-control rounded-0" placeholder="e.g. The Starry Night" />
+                                <span asp-validation-for="Name" class="text-danger small"></span>
+                            </div>
 
-                <div class="mb-3 form-check">
-                    <input class="form-check-input" asp-for="IsActive" />
-                    <label class="form-check-label" asp-for="IsActive">Is Active</label>
-                </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="ArtistId" class="form-label fw-bold small text-uppercase">Artisan / Master</label>
+                                <select asp-for="ArtistId" class="form-select rounded-0" asp-items="ViewBag.ArtistId">
+                                    <option value="">-- Select Artist --</option>
+                                </select>
+                                <span asp-validation-for="ArtistId" class="text-danger small"></span>
+                            </div>
+                        </div>
 
-                <div class="mb-3">
-                    <label asp-for="ArtistId" class="form-label">Artist</label>
-                    <select asp-for="ArtistId" class="form-select" asp-items="ViewBag.ArtistId">
-                        <option value="">-- Select Artist --</option>
-                    </select>
-                    <span asp-validation-for="ArtistId" class="text-danger"></span>
-                </div>
+                        <div class="mb-3">
+                            <label asp-for="ImageUrl" class="form-label fw-bold small text-uppercase">Image Archive Link</label>
+                            <input asp-for="ImageUrl" class="form-control rounded-0" placeholder="https://..." />
+                            <span asp-validation-for="ImageUrl" class="text-danger small"></span>
+                        </div>
 
-                <div class="form-group mt-4">
-                    <input type="submit" value="Create" class="btn btn-primary" />
-                    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                        <div class="mb-4">
+                            <label asp-for="Description" class="form-label fw-bold small text-uppercase">Historical Description</label>
+                            <textarea asp-for="Description" class="form-control rounded-0" rows="4"></textarea>
+                            <span asp-validation-for="Description" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4 form-check py-2 border rounded-0 bg-light px-5">
+                            <input class="form-check-input" asp-for="IsActive" />
+                            <label class="form-check-label fw-bold small text-uppercase" asp-for="IsActive">Available for Public Display</label>
+                        </div>
+
+                        <div class="d-flex gap-2 pt-3 border-top">
+                            <button type="submit" class="btn btn-dark rounded-0 px-5 fw-bold text-uppercase small">Create Entry</button>
+                            <a asp-action="Index" class="btn btn-outline-secondary rounded-0 px-4 fw-bold text-uppercase small">Cancel</a>
+                        </div>
+                    </form>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>

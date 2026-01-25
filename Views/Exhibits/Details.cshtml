@@ -1,43 +1,78 @@
 @model MuseumSystem.Models.Exhibit
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = Model.Name;
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Details</h1>
+<div class="container mt-5 mb-5">
+    <div class="row g-5">
+        <div class="col-md-7">
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <div class="position-relative p-3 bg-white shadow-lg border border-dark">
+                    <img src="@Model.ImageUrl" alt="@Model.Name" class="img-fluid w-100" style="max-height: 700px; object-fit: contain;" />
+                </div>
+            }
+            else
+            {
+                <div class="bg-light d-flex align-items-center justify-content-center border border-dark shadow-sm" style="height: 500px;">
+                    <div class="text-center">
+                        <i class="bi bi-image text-muted" style="font-size: 4rem;"></i>
+                        <p class="text-uppercase small mt-2 ls-2">Visual Archive Unavailable</p>
+                    </div>
+                </div>
+            }
+        </div>
 
-<div>
-    <h4>Exhibit</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsActive)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsActive)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Artist)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Artist.FullName)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+        <div class="col-md-5">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-4">
+                    <li class="breadcrumb-item"><a asp-action="Index" class="text-dark text-uppercase small fw-bold text-decoration-none">Gallery</a></li>
+                    <li class="breadcrumb-item active small text-uppercase" aria-current="page">@Model.Name</li>
+                </ol>
+            </nav>
+
+            <h1 class="display-5 fw-bold text-uppercase mb-2">@Model.Name</h1>
+            <h4 class="text-muted mb-4 fst-italic">
+                By <a asp-controller="Artists" asp-action="Details" asp-route-id="@Model.ArtistId" class="text-decoration-none text-dark border-bottom border-dark">@Model.Artist?.FullName</a>
+            </h4>
+
+            <div class="mb-4 d-flex align-items-center gap-3">
+                <div style="height: 3px; width: 60px; background: #b2945e;"></div>
+                @if (Model.IsActive)
+                {
+                    <span class="badge rounded-0 border text-dark fw-bold small text-uppercase px-3 py-2" style="font-size: 0.7rem; letter-spacing: 1px;">Currently on Display</span>
+                }
+                else
+                {
+                    <span class="badge rounded-0 bg-dark text-white fw-bold small text-uppercase px-3 py-2" style="font-size: 0.7rem; letter-spacing: 1px;">In Private Storage</span>
+                }
+            </div>
+            
+            <div class="exhibit-description mb-5" style="font-size: 1.1rem; line-height: 1.8; color: #333; text-align: justify;">
+                <p class="mb-0">@Model.Description</p>
+            </div>
+
+            <div class="card rounded-0 border-dark mb-5">
+                <div class="card-body bg-light">
+                    <h6 class="fw-bold text-uppercase small mb-2">Provenance & Data</h6>
+                    <div class="row small">
+                        <div class="col-4 text-muted text-uppercase" style="font-size: 0.75rem;">Archive ID</div>
+                        <div class="col-8 fw-bold">#MSM-@Model.Id.ToString("D4")</div>
+                        <div class="col-4 text-muted text-uppercase mt-1" style="font-size: 0.75rem;">Location</div>
+                        <div class="col-8 fw-bold">Main Exhibition Hall</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <a asp-action="Index" class="btn btn-outline-dark rounded-0 px-4 fw-bold text-uppercase small">Back to Gallery</a>
+                @if (User.IsInRole("Admin"))
+                {
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-dark rounded-0 px-4 fw-bold text-uppercase small">Modify Exhibit</a>
+                }
+            </div>
+        </div>
+    </div>
 </div>

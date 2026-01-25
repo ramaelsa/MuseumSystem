@@ -21,7 +21,7 @@ namespace MuseumSystem.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> Index(string searchString, string sortOrder, bool? isActive, int pageNumber = 1)
+        public async Task<IActionResult> Index(string searchString, string sortOrder, bool? isActive)
         {
             var query = _context.Exhibits.Include(e => e.Artist).AsQueryable();
 
@@ -50,17 +50,9 @@ namespace MuseumSystem.Controllers
                 default: query = query.OrderBy(e => e.Name); break;
             }
 
-            int pageSize = 6;
-            var totalItems = await query.CountAsync();
-            var results = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+            var results = await query.ToListAsync();
 
-            ViewData["TotalPages"] = (int)Math.Ceiling(totalItems / (double)pageSize);
-            ViewData["CurrentPage"] = pageNumber;
-
-            if (Request.Headers["Accept"].ToString().Contains("text/html"))
-                return View(results);
-
-            return Ok(results);
+            return View(results);
         }
 
         [HttpGet]
@@ -74,7 +66,7 @@ namespace MuseumSystem.Controllers
         [HttpPost]
         [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Exhibit exhibit)
+        public async Task<IActionResult> Create([Bind("Id,Name,Description,IsActive,ImageUrl,ArtistId")] Exhibit exhibit)
         {
             ModelState.Remove("Artist");
             if (ModelState.IsValid)
@@ -109,14 +101,22 @@ namespace MuseumSystem.Controllers
         [HttpPost]
         [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Exhibit exhibit)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,IsActive,ImageUrl,ArtistId")] Exhibit exhibit)
         {
             if (id != exhibit.Id) return BadRequest();
             ModelState.Remove("Artist");
             if (ModelState.IsValid)
             {
-                _context.Update(exhibit);
-                await _context.SaveChangesAsync();
+                try
+                {
+                    _context.Update(exhibit);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!ExhibitExists(exhibit.Id)) return NotFound();
+                    else throw;
+                }
                 return RedirectToAction(nameof(Index));
             }
             ViewBag.ArtistId = new SelectList(_context.Artists, "Id", "FullName", exhibit.ArtistId);
@@ -144,6 +144,11 @@ namespace MuseumSystem.Controllers
                 await _context.SaveChangesAsync();
             }
             return RedirectToAction(nameof(Index));
+        }
+
+        private bool ExhibitExists(int id)
+        {
+            return _context.Exhibits.Any(e => e.Id == id);
         }
     }
 }

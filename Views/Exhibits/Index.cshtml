@@ -24,23 +24,32 @@ Layout = "~/Views/Shared/_Layout.cshtml";
         @foreach (var item in Model)
         {
         <div class="col">
-            <div class="card h-100 shadow-sm border-0 rounded-0">
-                <div class="bg-light text-dark d-flex align-items-center justify-content-center border-bottom" style="height: 250px;">
-                    <span class="text-uppercase fw-light small" style="letter-spacing: 4px;">@item.Name</span>
+            <div class="card h-100 shadow-sm border-0 rounded-0 overflow-hidden">
+                <div class="bg-light position-relative" style="height: 300px;">
+                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+                    {
+                    <img src="@item.ImageUrl" class="w-100 h-100" style="object-fit: cover;" alt="@item.Name">
+                    }
+                    else
+                    {
+                    <div class="d-flex align-items-center justify-content-center h-100 border-bottom">
+                        <span class="text-uppercase fw-light small text-muted" style="letter-spacing: 4px;">No Image</span>
+                    </div>
+                    }
+
+                    @if (item.IsActive)
+                    {
+                    <span class="badge bg-white text-dark position-absolute top-0 end-0 m-3 rounded-0 border fw-normal" style="font-size: 0.65rem; letter-spacing: 1px;">AVAILABLE</span>
+                    }
                 </div>
 
                 <div class="card-body d-flex flex-column p-4">
-                    <div class="d-flex justify-content-between align-items-start mb-3">
-                        <h5 class="fw-bold text-uppercase mb-0" style="font-size: 1rem;">@item.Name</h5>
-                        @if (item.IsActive)
-                        {
-                        <span class="badge rounded-0 border text-dark fw-normal" style="font-size: 0.65rem;">AVAILABLE</span>
-                        }
+                    <div class="mb-2">
+                        <h5 class="fw-bold text-uppercase mb-0" style="font-size: 1.1rem; letter-spacing: 1px;">@item.Name</h5>
+                        <small class="text-muted">By @(item.Artist?.FullName ?? "Unknown Artisan")</small>
                     </div>
 
-                    <p class="text-muted small mb-3">Artisan: @item.Artist?.FullName</p>
-
-                    <p class="card-text text-truncate-3 flex-grow-1 small text-secondary" style="line-height: 1.6;">
+                    <p class="card-text text-truncate-3 flex-grow-1 small text-secondary mt-2" style="line-height: 1.6;">
                         @item.Description
                     </p>
 
@@ -75,6 +84,6 @@ Layout = "~/Views/Shared/_Layout.cshtml";
     }
     .card:hover {
         transform: translateY(-8px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.05) !important;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important;
     }
 </style>

@@ -1,48 +1,76 @@
 @model MuseumSystem.Models.Exhibit
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Edit Exhibit";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Edit</h1>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card border-0 shadow-sm rounded-0">
+                <div class="row g-0">
+                    <div class="col-md-4 bg-light d-flex align-items-center justify-content-center border-end">
+                        <div class="p-4 text-center w-100">
+                            <p class="small text-uppercase fw-bold text-muted mb-3">Current Preview</p>
+                            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                            {
+                                <img src="@Model.ImageUrl" class="img-fluid shadow-sm" style="max-height: 300px; object-fit: contain;" />
+                            }
+                            else
+                            {
+                                <div class="py-5 border border-dashed text-muted small">NO IMAGE ARCHIVED</div>
+                            }
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card-body p-4 p-md-5">
+                            <h4 class="fw-bold text-uppercase mb-4" style="letter-spacing: 2px;">Modify Exhibit</h4>
+                            <form asp-action="Edit">
+                                <input type="hidden" asp-for="Id" />
+                                <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
 
-<h4>Exhibit</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="Name" class="form-label fw-bold small text-uppercase">Piece Name</label>
+                                        <input asp-for="Name" class="form-control rounded-0" />
+                                        <span asp-validation-for="Name" class="text-danger small"></span>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="ArtistId" class="form-label fw-bold small text-uppercase">Artisan</label>
+                                        <select asp-for="ArtistId" class="form-select rounded-0" asp-items="ViewBag.ArtistId"></select>
+                                        <span asp-validation-for="ArtistId" class="text-danger small"></span>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="ImageUrl" class="form-label fw-bold small text-uppercase">Update Image Link</label>
+                                    <input asp-for="ImageUrl" class="form-control rounded-0" />
+                                    <span asp-validation-for="ImageUrl" class="text-danger small"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Description" class="form-label fw-bold small text-uppercase">Description</label>
+                                    <textarea asp-for="Description" class="form-control rounded-0" rows="4"></textarea>
+                                    <span asp-validation-for="Description" class="text-danger small"></span>
+                                </div>
+
+                                <div class="mb-4 form-check py-2 border rounded-0 bg-light px-5">
+                                    <input class="form-check-input" asp-for="IsActive" />
+                                    <label class="form-check-label fw-bold small text-uppercase" asp-for="IsActive">Is Available</label>
+                                </div>
+
+                                <div class="d-flex gap-2 pt-3 border-top">
+                                    <button type="submit" class="btn btn-dark rounded-0 px-5 fw-bold text-uppercase small">Save Changes</button>
+                                    <a asp-action="Index" class="btn btn-outline-secondary rounded-0 px-4 fw-bold text-uppercase small">Back</a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Description" class="control-label"></label>
-                <input asp-for="Description" class="form-control" />
-                <span asp-validation-for="Description" class="text-danger"></span>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="IsActive" /> @Html.DisplayNameFor(model => model.IsActive)
-                </label>
-            </div>
-            <div class="form-group">
-                <label asp-for="ArtistId" class="control-label"></label>
-                <select asp-for="ArtistId" class="form-control" asp-items="ViewBag.ArtistId"></select>
-                <span asp-validation-for="ArtistId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
 </div>
 
 @section Scripts {

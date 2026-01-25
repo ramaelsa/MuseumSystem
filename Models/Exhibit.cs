@@ -12,6 +12,8 @@ namespace MuseumSystem.Models
         public string Description { get; set; } = string.Empty;
 
         public bool IsActive { get; set; } = true;
+
+        public string? ImageUrl { get; set; }
         
         [Required]
         public int ArtistId { get; set; }
