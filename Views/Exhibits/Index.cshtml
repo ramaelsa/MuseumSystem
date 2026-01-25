@@ -1,92 +1,50 @@
 @model IEnumerable<MuseumSystem.Models.Exhibit>
-
-@{
-    ViewData["Title"] = "Gallery";
-    Layout = "~/Views/Shared/_Layout.cshtml";
-}
-
 <div class="container mt-4">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5 gap-3">
+    <div class="d-flex justify-content-between align-items-end mb-4">
         <div>
-            <h1 class="display-5 fw-bold mb-0">Museum Gallery</h1>
-            <p class="text-muted text-uppercase small ls-2" style="letter-spacing: 2px;">Current Collections</p>
+            <h1 class="fw-bold text-uppercase m-0">Museum Gallery</h1>
+            <p class="text-muted small mb-0 text-uppercase" style="letter-spacing: 1px;">Curated Collections</p>
         </div>
-
-        <div class="d-flex gap-2 align-items-center">
-            <form asp-action="Index" method="get" class="d-flex gap-2">
-                <div class="input-group">
-                    <input type="text" name="searchString" value="@ViewData["SearchString"]"
-                           class="form-control rounded-0 border-dark shadow-none small"
-                           placeholder="Search masterpiece or artist..." style="min-width: 250px;">
-                    <button class="btn btn-dark rounded-0" type="submit">
-                        <i class="bi bi-search"></i>
-                    </button>
-                </div>
-                @if (!string.IsNullOrEmpty(ViewData["SearchString"]?.ToString()))
-                {
-                    <a asp-action="Index" class="btn btn-outline-secondary rounded-0">Clear</a>
-                }
-            </form>
-
-            @if (User.IsInRole("Admin"))
-            {
-                <a asp-action="Create" class="btn btn-dark rounded-0 px-4 py-2 fw-bold text-uppercase small ms-md-2">
-                    <i class="bi bi-plus-lg me-2"></i> Register
-                </a>
-            }
-        </div>
+        @if (User.IsInRole("Admin")) {
+            <a asp-action="Create" class="btn btn-dark rounded-0 px-4 fw-bold small text-uppercase">Add Exhibit</a>
+        }
     </div>
 
-    @if (!Model.Any())
-    {
-        <div class="text-center py-5 border border-dashed">
-            <i class="bi bi-search text-muted display-1"></i>
-            <p class="mt-3 text-uppercase fw-bold text-muted">No masterpieces found for "@ViewData["SearchString"]"</p>
-            <a asp-action="Index" class="text-dark small fw-bold">SHOW ALL COLLECTION</a>
-        </div>
-    }
+    <div class="bg-light p-3 border mb-5">
+        <form asp-action="Index" method="get" class="row g-2 align-items-center">
+            <div class="col-md-5">
+                <input type="text" name="searchString" value="@ViewData["SearchString"]" class="form-control rounded-0 shadow-none border-dark" placeholder="Search...">
+            </div>
+            <div class="col-md-4">
+                <select name="sortOrder" class="form-select rounded-0 shadow-none border-dark" onchange="this.form.submit()">
+                    <option value="">Sort By: Title (A-Z)</option>
+                    <option value="name_desc" selected="@(ViewData["CurrentSort"]?.ToString() == "name_desc")">Sort By: Title (Z-A)</option>
+                    <option value="artist" selected="@(ViewData["CurrentSort"]?.ToString() == "artist")">Sort By: Artist</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-dark rounded-0 w-100 fw-bold text-uppercase">Apply</button>
+            </div>
+        </form>
+    </div>
 
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-        @foreach (var item in Model)
-        {
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @foreach (var item in Model) {
             <div class="col">
-                <div class="card h-100 shadow-sm border-0 rounded-0 overflow-hidden">
-                    <div class="bg-light position-relative" style="height: 300px;">
-                        @if (!string.IsNullOrEmpty(item.ImageUrl))
-                        {
-                            <img src="@item.ImageUrl" class="w-100 h-100" style="object-fit: cover;" alt="@item.Name">
-                        }
-                        else
-                        {
-                            <div class="d-flex align-items-center justify-content-center h-100 border-bottom">
-                                <span class="text-uppercase fw-light small text-muted" style="letter-spacing: 4px;">No Image</span>
-                            </div>
-                        }
-
-                        @if (item.IsActive)
-                        {
-                            <span class="badge bg-white text-dark position-absolute top-0 end-0 m-3 rounded-0 border fw-normal" style="font-size: 0.65rem; letter-spacing: 1px;">AVAILABLE</span>
-                        }
+                <div class="card h-100 border-0 shadow-sm bg-light rounded-0">
+                    <div style="height: 250px; overflow: hidden;">
+                        @if (!string.IsNullOrEmpty(item.ImageUrl)) { <img src="@item.ImageUrl" class="w-100 h-100" style="object-fit: cover;"> }
+                        else { <div class="bg-secondary h-100 d-flex align-items-center justify-content-center text-white">No Image</div> }
                     </div>
-
-                    <div class="card-body d-flex flex-column p-4">
-                        <div class="mb-2">
-                            <h5 class="fw-bold text-uppercase mb-0" style="font-size: 1.1rem; letter-spacing: 1px;">@item.Name</h5>
-                            <small class="text-muted">By @(item.Artist?.FullName ?? "Unknown Artisan")</small>
-                        </div>
-
-                        <p class="card-text text-truncate-3 flex-grow-1 small text-secondary mt-2" style="line-height: 1.6;">
-                            @item.Description
-                        </p>
-
-                        <div class="mt-4 pt-3 border-top d-flex justify-content-between align-items-center">
-                            <a asp-action="Details" asp-route-id="@item.Id" class="text-dark fw-bold text-decoration-none small text-uppercase" style="letter-spacing: 1px;">View Entry</a>
-
-                            @if (User.IsInRole("Admin"))
-                            {
-                                <div class="d-flex gap-3">
-                                    <a asp-action="Edit" asp-route-id="@item.Id" class="text-secondary small"><i class="bi bi-pencil"></i></a>
-                                    <a asp-action="Delete" asp-route-id="@item.Id" class="text-danger small"><i class="bi bi-trash"></i></a>
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold text-uppercase">@item.Name</h5>
+                        <p class="text-muted small" style="height: 4.5em; overflow: hidden;">@item.Description</p>
+                        <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                            <a asp-action="Details" asp-route-id="@item.Id" class="text-dark fw-bold text-decoration-none small text-uppercase">View Details</a>
+                            @if (User.IsInRole("Admin")) {
+                                <div>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="text-secondary me-2"><i class="bi bi-pencil"></i></a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="text-danger"><i class="bi bi-trash"></i></a>
                                 </div>
                             }
                         </div>
@@ -95,68 +53,4 @@
             </div>
         }
     </div>
-
-    <div class="d-flex justify-content-center mt-5">
-        <nav aria-label="Page navigation">
-            <ul class="pagination">
-                @{
-                    int currentPage = (int)ViewData["CurrentPage"];
-                    int totalPages = (int)ViewData["TotalPages"];
-                    var prevDisabled = currentPage <= 1 ? "disabled" : "";
-                    var nextDisabled = currentPage >= totalPages ? "disabled" : "";
-                }
-
-                <li class="page-item @prevDisabled">
-                    <a class="page-link rounded-0 border-dark text-dark shadow-none" 
-                       asp-action="Index" 
-                       asp-route-pageNumber="@(currentPage - 1)" 
-                       asp-route-searchString="@ViewData["SearchString"]" 
-                       asp-route-sortOrder="@ViewData["CurrentSort"]">Previous</a>
-                </li>
-
-                @for (int i = 1; i <= totalPages; i++)
-                {
-                    <li class="page-item @(i == currentPage ? "active" : "")">
-                        <a class="page-link border-dark shadow-none @(i == currentPage ? "bg-dark border-dark text-white" : "text-dark")" 
-                           asp-action="Index" 
-                           asp-route-pageNumber="@i"
-                           asp-route-searchString="@ViewData["SearchString"]"
-                           asp-route-sortOrder="@ViewData["CurrentSort"]">@i</a>
-                    </li>
-                }
-
-                <li class="page-item @nextDisabled">
-                    <a class="page-link rounded-0 border-dark text-dark shadow-none" 
-                       asp-action="Index" 
-                       asp-route-pageNumber="@(currentPage + 1)"
-                       asp-route-searchString="@ViewData["SearchString"]"
-                       asp-route-sortOrder="@ViewData["CurrentSort"]">Next</a>
-                </li>
-            </ul>
-        </nav>
-    </div>
 </div>
-
-<style>
-    .text-truncate-3 {
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-    .card {
-        transition: all 0.3s ease;
-        border: 1px solid #eee !important;
-    }
-    .card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important;
-    }
-    .border-dashed {
-        border-style: dashed !important;
-        border-width: 2px !important;
-    }
-    .page-link:focus {
-        box-shadow: none;
-    }
-</style>

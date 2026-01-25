@@ -19,36 +19,22 @@ namespace MuseumSystem.Controllers
             _context = context;
         }
 
-        [HttpGet]
-        [AllowAnonymous]
         public async Task<IActionResult> Index(string searchString, string sortOrder, bool? isActive, int pageNumber = 1)
         {
-            var query = _context.Exhibits.Include(e => e.Artist).Include(e => e.Room).AsQueryable();
-
-            if (!User.Identity.IsAuthenticated)
-            {
-                query = query.Where(e => e.IsActive);
-            }
-
-            if (!string.IsNullOrEmpty(searchString))
-            {
-                query = query.Where(e => e.Name.Contains(searchString) || 
-                                       e.Description.Contains(searchString) || 
-                                       e.Artist.FullName.Contains(searchString));
-            }
-
-            if (isActive.HasValue)
-            {
-                query = query.Where(e => e.IsActive == isActive.Value);
-            }
-
             ViewData["CurrentSort"] = sortOrder;
             ViewData["SearchString"] = searchString;
+
+            var query = _context.Exhibits.Include(e => e.Artist).Include(e => e.Room).AsQueryable();
+
+            if (!User.Identity.IsAuthenticated) query = query.Where(e => e.IsActive);
+            if (!string.IsNullOrEmpty(searchString)) query = query.Where(e => e.Name.Contains(searchString) || e.Artist.FullName.Contains(searchString));
+            if (isActive.HasValue) query = query.Where(e => e.IsActive == isActive.Value);
 
             switch (sortOrder)
             {
                 case "name_desc": query = query.OrderByDescending(e => e.Name); break;
-                case "id_asc": query = query.OrderBy(e => e.Id); break;
+                case "artist": query = query.OrderBy(e => e.Artist.FullName); break;
+                case "id_desc": query = query.OrderByDescending(e => e.Id); break;
                 default: query = query.OrderBy(e => e.Name); break;
             }
 
@@ -62,7 +48,6 @@ namespace MuseumSystem.Controllers
             return View(results);
         }
 
-        [HttpGet]
         [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
@@ -76,40 +61,24 @@ namespace MuseumSystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Name,Description,IsActive,ImageUrl,ArtistId,RoomId")] Exhibit exhibit)
         {
-            ModelState.Remove("Artist");
-            ModelState.Remove("Room");
-
-            if (ModelState.IsValid)
-            {
-                _context.Add(exhibit);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
+            ModelState.Remove("Artist"); ModelState.Remove("Room");
+            if (ModelState.IsValid) { _context.Add(exhibit); await _context.SaveChangesAsync(); return RedirectToAction(nameof(Index)); }
             ViewBag.ArtistId = new SelectList(_context.Artists, "Id", "FullName", exhibit.ArtistId);
             ViewBag.RoomId = new SelectList(_context.Rooms, "Id", "Name", exhibit.RoomId);
             return View(exhibit);
         }
 
-        [HttpGet]
-        [AllowAnonymous]
         public async Task<IActionResult> Details(int id)
         {
-            var exhibit = await _context.Exhibits
-                .Include(e => e.Artist)
-                .Include(e => e.Room)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            
-            if (exhibit == null) return NotFound();
-            return View(exhibit);
+            var exhibit = await _context.Exhibits.Include(e => e.Artist).Include(e => e.Room).FirstOrDefaultAsync(m => m.Id == id);
+            return exhibit == null ? NotFound() : View(exhibit);
         }
 
-        [HttpGet]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id)
         {
             var exhibit = await _context.Exhibits.FindAsync(id);
             if (exhibit == null) return NotFound();
-            
             ViewBag.ArtistId = new SelectList(_context.Artists, "Id", "FullName", exhibit.ArtistId);
             ViewBag.RoomId = new SelectList(_context.Rooms, "Id", "Name", exhibit.RoomId);
             return View(exhibit);
@@ -121,36 +90,16 @@ namespace MuseumSystem.Controllers
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,IsActive,ImageUrl,ArtistId,RoomId")] Exhibit exhibit)
         {
             if (id != exhibit.Id) return BadRequest();
-            
-            ModelState.Remove("Artist");
-            ModelState.Remove("Room");
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(exhibit);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ExhibitExists(exhibit.Id)) return NotFound();
-                    else throw;
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewBag.ArtistId = new SelectList(_context.Artists, "Id", "FullName", exhibit.ArtistId);
-            ViewBag.RoomId = new SelectList(_context.Rooms, "Id", "Name", exhibit.RoomId);
+            ModelState.Remove("Artist"); ModelState.Remove("Room");
+            if (ModelState.IsValid) { _context.Update(exhibit); await _context.SaveChangesAsync(); return RedirectToAction(nameof(Index)); }
             return View(exhibit);
         }
 
-        [HttpGet]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var exhibit = await _context.Exhibits.Include(e => e.Artist).FirstOrDefaultAsync(m => m.Id == id);
-            if (exhibit == null) return NotFound();
-            return View(exhibit);
+            return exhibit == null ? NotFound() : View(exhibit);
         }
 
         [HttpPost, ActionName("Delete")]
@@ -159,17 +108,8 @@ namespace MuseumSystem.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var exhibit = await _context.Exhibits.FindAsync(id);
-            if (exhibit != null)
-            {
-                _context.Exhibits.Remove(exhibit);
-                await _context.SaveChangesAsync();
-            }
+            if (exhibit != null) { _context.Exhibits.Remove(exhibit); await _context.SaveChangesAsync(); }
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool ExhibitExists(int id)
-        {
-            return _context.Exhibits.Any(e => e.Id == id);
         }
     }
 }

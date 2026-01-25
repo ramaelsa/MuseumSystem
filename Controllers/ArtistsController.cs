@@ -18,8 +18,11 @@ namespace MuseumSystem.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index(string searchString, int pageNumber = 1)
+        public async Task<IActionResult> Index(string searchString, string sortOrder, int pageNumber = 1)
         {
+            ViewData["CurrentSort"] = sortOrder;
+            ViewData["SearchString"] = searchString;
+
             var query = _context.Artists.AsQueryable();
 
             if (!string.IsNullOrEmpty(searchString))
@@ -27,7 +30,12 @@ namespace MuseumSystem.Controllers
                 query = query.Where(a => a.FullName.Contains(searchString) || a.Bio.Contains(searchString));
             }
 
-            ViewData["SearchString"] = searchString;
+            switch (sortOrder)
+            {
+                case "name_desc": query = query.OrderByDescending(a => a.FullName); break;
+                case "bio_asc": query = query.OrderBy(a => a.Bio); break;
+                default: query = query.OrderBy(a => a.FullName); break;
+            }
 
             int pageSize = 6;
             var totalItems = await query.CountAsync();
@@ -40,10 +48,7 @@ namespace MuseumSystem.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        public IActionResult Create()
-        {
-            return View();
-        }
+        public IActionResult Create() => View();
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
@@ -74,19 +79,10 @@ namespace MuseumSystem.Controllers
         public async Task<IActionResult> Edit(int id, [Bind("Id,FullName,Bio,ImageUrl")] Artist artist)
         {
             if (id != artist.Id) return NotFound();
-
             if (ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(artist);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ArtistExists(artist.Id)) return NotFound();
-                    else throw;
-                }
+                try { _context.Update(artist); await _context.SaveChangesAsync(); }
+                catch (DbUpdateConcurrencyException) { if (!_context.Artists.Any(e => e.Id == artist.Id)) return NotFound(); else throw; }
                 return RedirectToAction(nameof(Index));
             }
             return View(artist);
@@ -95,9 +91,7 @@ namespace MuseumSystem.Controllers
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
-            var artist = await _context.Artists
-                .Include(a => a.Exhibits)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var artist = await _context.Artists.Include(a => a.Exhibits).FirstOrDefaultAsync(m => m.Id == id);
             if (artist == null) return NotFound();
             return View(artist);
         }
@@ -120,11 +114,6 @@ namespace MuseumSystem.Controllers
             if (artist != null) _context.Artists.Remove(artist);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool ArtistExists(int id)
-        {
-            return _context.Artists.Any(e => e.Id == id);
         }
     }
 }

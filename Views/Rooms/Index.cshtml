@@ -1,56 +1,53 @@
 @model IEnumerable<MuseumSystem.Models.Room>
-
-@{
-    ViewData["Title"] = "Museum Galleries";
-    Layout = "~/Views/Shared/_Layout.cshtml";
-}
-
 <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-5">
+    <div class="d-flex justify-content-between align-items-end mb-4">
         <div>
-            <h1 class="fw-bold text-uppercase mb-0" style="letter-spacing: 2px;">Museum Galleries</h1>
-            <p class="text-muted small">Floor Plan & Curated Spaces</p>
+            <h1 class="fw-bold text-uppercase m-0">Museum Space</h1>
+            <p class="text-muted small mb-0 text-uppercase" style="letter-spacing: 1px;">Floor Plan Management</p>
         </div>
-        @if (User.IsInRole("Admin"))
-        {
-            <a asp-action="Create" class="btn btn-dark rounded-0 px-4 fw-bold">
-                <i class="bi bi-plus-lg me-2"></i>ESTABLISH NEW GALLERY
-            </a>
+        @if (User.IsInRole("Admin")) {
+            <a asp-action="Create" class="btn btn-dark rounded-0 px-4 fw-bold small text-uppercase">Add Room</a>
         }
     </div>
 
-    <div class="row g-4">
-        @foreach (var item in Model)
-        {
-            <div class="col-md-6">
-                <div class="card h-100 border-0 shadow-sm rounded-0 bg-light overflow-hidden">
-                    @if (!string.IsNullOrEmpty(item.ImageUrl))
-                    {
-                        <div style="height: 200px; overflow: hidden;">
-                            <img src="@item.ImageUrl" class="card-img-top rounded-0 w-100 h-100" style="object-fit: cover;" alt="@item.Name">
-                        </div>
-                    }
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <span class="badge bg-dark rounded-0 mb-2 px-3">LEVEL @item.Floor</span>
-                                <h3 class="fw-bold text-uppercase">@item.Name</h3>
-                            </div>
-                            <div class="text-end">
-                                <span class="h4 fw-bold text-dark">@item.Exhibits?.Count</span>
-                                <p class="small text-muted text-uppercase mb-0" style="font-size: 0.65rem;">Collections</p>
-                            </div>
-                        </div>
-                        <p class="text-muted mt-3 small" style="line-height: 1.6;">@item.Description</p>
+    <div class="bg-light p-3 border mb-5">
+        <form asp-action="Index" method="get" class="row g-2 align-items-center">
+            <div class="col-md-5">
+                <div class="form-control rounded-0 border-dark bg-light text-muted">Room directory active</div>
+            </div>
+            <div class="col-md-4">
+                <select name="sortOrder" class="form-select rounded-0 shadow-none border-dark" onchange="this.form.submit()">
+                    <option value="">Sort By: Name (A-Z)</option>
+                    <option value="name_desc" selected="@(ViewData["CurrentSort"]?.ToString() == "name_desc")">Sort By: Name (Z-A)</option>
+                    <option value="floor" selected="@(ViewData["CurrentSort"]?.ToString() == "floor")">Sort By: Floor</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-dark rounded-0 w-100 fw-bold text-uppercase">Apply</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @foreach (var item in Model) {
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm bg-light rounded-0">
+                    <div style="height: 250px; overflow: hidden;">
+                        @if (!string.IsNullOrEmpty(item.ImageUrl)) { <img src="@item.ImageUrl" class="w-100 h-100" style="object-fit: cover;"> }
+                        else { <div class="bg-secondary h-100 d-flex align-items-center justify-content-center text-white">No Image</div> }
                     </div>
-                    <div class="card-footer bg-white border-0 p-4 pt-0">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-dark btn-sm rounded-0 px-4 fw-bold">VIEW COLLECTION</a>
-                            @if (User.IsInRole("Admin"))
-                            {
-                                <div class="btn-group">
-                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-link text-secondary text-decoration-none">Edit</a>
-                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-link text-danger text-decoration-none">Delete</a>
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between">
+                            <h5 class="fw-bold text-uppercase">@item.Name</h5>
+                            <span class="badge bg-dark rounded-0">FLR @item.Floor</span>
+                        </div>
+                        <p class="text-muted small" style="height: 4.5em; overflow: hidden;">@item.Description</p>
+                        <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                            <a asp-action="Details" asp-route-id="@item.Id" class="text-dark fw-bold text-decoration-none small text-uppercase">View Details</a>
+                            @if (User.IsInRole("Admin")) {
+                                <div>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="text-secondary me-2"><i class="bi bi-pencil"></i></a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="text-danger"><i class="bi bi-trash"></i></a>
                                 </div>
                             }
                         </div>
