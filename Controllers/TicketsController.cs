@@ -24,8 +24,49 @@ namespace MuseumSystem.Controllers
             {
                 query = query.Where(t => t.UserId == userId);
             }
+            else
+            {
+                var priceSetting = await _context.SystemSettings.FirstOrDefaultAsync(s => s.Key == "TicketPrice");
+                ViewBag.GlobalPrice = priceSetting?.Value ?? 25.00m;
+            }
 
             return View(await query.ToListAsync());
+        }
+
+        [Authorize]
+        public async Task<IActionResult> Create()
+        {
+            if (User.IsInRole("Admin")) return Forbid();
+
+            var priceSetting = await _context.SystemSettings.FirstOrDefaultAsync(s => s.Key == "TicketPrice");
+            ViewBag.CurrentPrice = priceSetting?.Value ?? 25.00m;
+            return View();
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(Ticket ticket)
+        {
+            if (User.IsInRole("Admin")) return Forbid();
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var priceSetting = await _context.SystemSettings.FirstOrDefaultAsync(s => s.Key == "TicketPrice");
+            
+            ticket.UserId = userId;
+            ticket.Price = priceSetting?.Value ?? 25.00m;
+
+            ModelState.Remove("UserId");
+            ModelState.Remove("Price");
+
+            if (ModelState.IsValid)
+            {
+                _context.Add(ticket);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            ViewBag.CurrentPrice = ticket.Price;
+            return View(ticket);
         }
 
         [Authorize(Roles = "Admin")]
@@ -64,7 +105,7 @@ namespace MuseumSystem.Controllers
                         Action = "Admin Correction",
                         EntityName = "Ticket",
                         DateTime = DateTime.Now,
-                        Details = $"Ticket {id} modified. Reason: {reasonForChange}. Price maintained at {originalTicket.Price}."
+                        Details = $"Admin corrected ticket {id}. Reason: {reasonForChange}"
                     });
                     await _context.SaveChangesAsync();
                 }
@@ -78,45 +119,6 @@ namespace MuseumSystem.Controllers
             return View(ticket);
         }
 
-        [Authorize]
-        public async Task<IActionResult> Create()
-        {
-            var priceSetting = await _context.SystemSettings.FirstOrDefaultAsync(s => s.Key == "TicketPrice");
-            ViewBag.CurrentPrice = priceSetting?.Value ?? 25.00m;
-            return View();
-        }
-
-        [HttpPost]
-        [Authorize]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Ticket ticket)
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var priceSetting = await _context.SystemSettings.FirstOrDefaultAsync(s => s.Key == "TicketPrice");
-            
-            ticket.UserId = userId;
-            ticket.Price = priceSetting?.Value ?? 25.00m;
-
-            ModelState.Remove("UserId");
-            ModelState.Remove("Price");
-
-            if (ModelState.IsValid)
-            {
-                _context.Add(ticket);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewBag.CurrentPrice = ticket.Price;
-            return View(ticket);
-        }
-
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> SetPrice()
-        {
-            var setting = await _context.SystemSettings.FirstOrDefaultAsync(s => s.Key == "TicketPrice");
-            return View(setting);
-        }
-
         [HttpPost]
         [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
@@ -127,14 +129,16 @@ namespace MuseumSystem.Controllers
             {
                 setting.Value = newValue;
                 _context.Update(setting);
+                
                 _context.AuditLogs.Add(new AuditLog
                 {
                     UserId = User.FindFirstValue(ClaimTypes.NameIdentifier),
                     Action = "Price Update",
                     EntityName = "SystemSetting",
                     DateTime = DateTime.Now,
-                    Details = $"Global price set to {newValue}."
+                    Details = $"Admin updated global price to {newValue.ToString("C")}"
                 });
+
                 await _context.SaveChangesAsync();
             }
             return RedirectToAction(nameof(Index));

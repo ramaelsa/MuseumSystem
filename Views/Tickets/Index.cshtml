@@ -1,92 +1,74 @@
 @model IEnumerable<MuseumSystem.Models.Ticket>
 
 @{
-    ViewData["Title"] = "Visitor Information";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Tickets";
 }
 
-<div class="container mt-5">
-    <div class="row g-5">
-        <div class="col-lg-7">
-            <h1 class="display-4 fw-bold mb-4">Plan Your Visit</h1>
-            <p class="text-muted mb-5">Welcome to the Museum Core Repository.</p>
-
-            <div class="row g-4">
-                <div class="col-md-6">
-                    <h5 class="fw-bold text-uppercase small">Location</h5>
-                    <p class="text-secondary">100 Museum Plaza<br>Art District, NY 10001</p>
-                </div>
-                <div class="col-md-6">
-                    <h5 class="fw-bold text-uppercase small">Hours</h5>
-                    <p class="text-secondary">Tue — Sun: 10am – 6pm</p>
-                </div>
-            </div>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+        <div>
+            <h1 class="fw-bold text-uppercase m-0">Ticket Repository</h1>
+            <p class="text-muted small">@(User.IsInRole("Admin") ? "Administrative Management Mode" : "Personal Archive")</p>
         </div>
         
-        <div class="col-lg-5">
-            <div class="card shadow-sm border-0 rounded-0 p-5 text-center bg-white border">
-                <i class="bi bi-ticket-detailed display-1 mb-4 text-dark"></i>
-                <h2 class="fw-bold mb-3">Tickets</h2>
-                
-                @if (User.Identity.IsAuthenticated)
-                {
-                    <p class="mb-4">Book your next visit below.</p>
-                    <a asp-action="Create" class="btn btn-dark rounded-0 w-100 py-3 text-uppercase fw-bold">Book a Ticket</a>
-                }
-                else
-                {
-                    <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-outline-dark rounded-0 w-100 py-3 text-uppercase fw-bold mb-3">Login to Book</a>
-                }
+        @if (!User.IsInRole("Admin"))
+        {
+            <a asp-action="Create" class="btn btn-dark rounded-0 px-4 fw-bold">BOOK NEW TICKET</a>
+        }
+    </div>
+
+    @if (User.IsInRole("Admin"))
+    {
+        <div class="card rounded-0 mb-4 bg-light border-dark shadow-sm">
+            <div class="card-body">
+                <form asp-action="SetPrice" method="post" class="row align-items-center">
+                    @Html.AntiForgeryToken()
+                    <div class="col-auto">
+                        <label class="fw-bold text-uppercase small"><i class="bi bi-tag-fill me-1"></i> Global Price:</label>
+                    </div>
+                    <div class="col-auto">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-dark text-white rounded-0 border-dark">$</span>
+                            <input type="number" name="newValue" step="0.01" class="form-control rounded-0 border-dark" value="@ViewBag.GlobalPrice" style="width: 100px;" required />
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-sm btn-dark rounded-0 px-3 fw-bold">UPDATE PRICE</button>
+                    </div>
+                </form>
             </div>
         </div>
-    </div>
-    
-    @if (User.Identity.IsAuthenticated)
-    {
-        <div class="mt-5 pt-5 border-top">
-            <h3 class="fw-bold mb-4">@(User.IsInRole("Admin") ? "ADMIN: ALL SALES LOG" : "MY PURCHASE HISTORY")</h3>
-            
-            @if (!Model.Any())
-            {
-                <div class="alert alert-light border">You haven't booked any tickets yet.</div>
-            }
-            else
-            {
-                <table class="table table-hover align-middle">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Visitor Name</th>
-                            <th>Visit Date</th>
-                            <th>Price</th>
-                            <th class="text-end px-4">Status / Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    @foreach (var item in Model) {
-                        <tr>
-                            <td class="fw-bold">@item.VisitorName</td>
-                            <td>@item.VisitDate.ToShortDateString()</td>
-                            <td>$@item.Price</td>
-                            <td class="text-end px-4">
-                                <div class="d-flex justify-content-end align-items-center gap-2">
-                                    @if (User.IsInRole("Admin"))
-                                    {
-                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-link text-secondary text-decoration-none">Edit</a>
-                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-link text-danger text-decoration-none">Void</a>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-success text-uppercase me-2">Confirmed</span>
-                                        @* Changed asp-action from "Cancel" to "Delete" to match Controller *@
-                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger rounded-0 px-2" style="font-size: 0.7rem;">CANCEL</a>
-                                    }
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                    </tbody>
-                </table>
-            }
-        </div>
     }
+
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead class="table-light">
+                <tr class="small text-uppercase fw-bold">
+                    <th>Visitor Name</th>
+                    <th>Visit Date</th>
+                    <th>Price Paid</th>
+                    <th class="text-end">Management</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="fw-bold">@item.VisitorName</td>
+                        <td>@item.VisitDate.ToShortDateString()</td>
+                        <td class="font-monospace">@item.Price.ToString("C")</td>
+                        <td class="text-end">
+                            <div class="btn-group">
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-dark rounded-0">CORRECT</a>
+                                }
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger rounded-0">DELETE</a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 </div>
